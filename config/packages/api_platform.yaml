@@ -1,0 +1,9 @@
+api_platform:
+    title: "Library Book Catalog API"
+    version: 1.0.0
+    formats:
+        json: ["application/json", "application/ld+json"]
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ["Content-Type", "Authorization", "Origin"]
