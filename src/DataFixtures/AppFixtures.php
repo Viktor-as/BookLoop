@@ -6,7 +6,6 @@ use App\Entity\AuthorBook;
 use App\Entity\Authors;
 use App\Entity\BookCategory;
 use App\Entity\Books;
-use App\Entity\Borrows;
 use App\Entity\Categories;
 use App\Entity\Settings;
 use App\Entity\Users;
@@ -178,31 +177,6 @@ class AppFixtures extends Fixture
             ->setUpdatedBy($admin);
         $manager->persist($defaultLimit);
         $manager->persist($defaultDays);
-
-        for ($b = 0; $b < 5; ++$b) {
-            $borrow = (new Borrows())
-                ->setBook($books[$b])
-                ->setMember($member)
-                ->setBorrowedAt(new \DateTimeImmutable(sprintf('-%d days', 2 + $b)))
-                ->setDueDate(new \DateTimeImmutable(sprintf('+%d days', 10 + $b)))
-                ->setReturnedAt(null);
-            $manager->persist($borrow);
-        }
-
-        for ($k = 0; $k < 15; ++$k) {
-            $bookIndex = 10 + (($k * 7) % 90);
-            $borrowed = new \DateTimeImmutable(sprintf('-%d days', 80 + $k * 3));
-            $due      = (clone $borrowed)->modify(sprintf('+%d days', 14));
-            $returned = (clone $borrowed)->modify(sprintf('+%d days', 5 + ($k % 10)));
-
-            $borrow = (new Borrows())
-                ->setBook($books[$bookIndex])
-                ->setMember($member)
-                ->setBorrowedAt($borrowed)
-                ->setDueDate($due)
-                ->setReturnedAt($returned);
-            $manager->persist($borrow);
-        }
 
         $manager->flush();
     }

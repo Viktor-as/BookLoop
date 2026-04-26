@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Borrowed books · BookLoop{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/catalog.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="catalog-header borrowed-header">
+    <h1>Borrowed books</h1>
+    <p>Loans you have out now and books you have returned in the past.</p>
+</div>
+
+<div id="borrowed-error" class="catalog-error" style="display:none;" role="alert"></div>
+<div id="borrowed-loading" class="catalog-loading">Loading your loans…</div>
+
+<section class="borrowed-section" id="borrowed-section-active" style="display:none;" aria-labelledby="borrowed-heading-active">
+    <h2 id="borrowed-heading-active" class="borrowed-section-title">On loan</h2>
+    <ul id="borrowed-active-list" class="catalog-list" aria-live="polite"></ul>
+</section>
+
+<section class="borrowed-section" id="borrowed-section-history" style="display:none;" aria-labelledby="borrowed-heading-history">
+    <h2 id="borrowed-heading-history" class="borrowed-section-title">Past loans</h2>
+    <ul id="borrowed-history-list" class="catalog-list" aria-live="polite"></ul>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/borrowed-books.js') }}"></script>
+{% endblock %}

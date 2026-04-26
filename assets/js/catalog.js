@@ -24,10 +24,7 @@ function getFilterSearchParams() {
         out.set("categoryId", categoryId);
     }
     const av = sp.get("available");
-    if (
-        av !== null &&
-        ["1", "true", "on"].includes(String(av).toLowerCase())
-    ) {
+    if (av !== null && ["1", "true", "on"].includes(String(av).toLowerCase())) {
         out.set("available", "1");
     }
     return out;
@@ -57,8 +54,7 @@ function buildCatalogApiUrl(page) {
 
 function isAvailableParamTrue(raw) {
     return (
-        raw !== null &&
-        ["1", "true", "on"].includes(String(raw).toLowerCase())
+        raw !== null && ["1", "true", "on"].includes(String(raw).toLowerCase())
     );
 }
 

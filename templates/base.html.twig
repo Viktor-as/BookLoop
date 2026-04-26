@@ -13,6 +13,9 @@
             <div>
                 <a href="{{ path('home') }}" class="brand">📚 Library</a>
                 <a href="{{ path('home') }}" {% if app.request.attributes.get('_route') == 'home' %}class="active"{% endif %}>Catalog</a>
+                {% if app.user %}
+                    <a href="{{ path('borrowed_books') }}" {% if app.request.attributes.get('_route') == 'borrowed_books' %}class="active"{% endif %}>Borrowed books</a>
+                {% endif %}
             </div>
             <div>
                 {% if app.user %}
