@@ -106,10 +106,19 @@ function renderList(items) {
         .map((item) => {
             const authors = item.authors ?? "—";
             const categories = item.categories ?? "—";
-            const statusClass = item.available ? "available" : "unavailable";
-            const statusLabel = item.available
-                ? "Available to borrow"
-                : "All copies borrowed";
+            const borrowedByMe = Boolean(item.borrowedByMe);
+            let statusClass;
+            let statusLabel;
+            if (borrowedByMe) {
+                statusClass = "self-borrowed";
+                statusLabel = "Already borrowed by you";
+            } else if (item.available) {
+                statusClass = "available";
+                statusLabel = "Available to borrow";
+            } else {
+                statusClass = "unavailable";
+                statusLabel = "All copies borrowed";
+            }
 
             const slug =
                 typeof item.slug === "string" && item.slug.length > 0
@@ -118,9 +127,10 @@ function renderList(items) {
             const detailHref = slug
                 ? `/books/${encodeURIComponent(slug)}`
                 : "#";
-            const actionLabel = item.available
-                ? "Read more / Borrow"
-                : "Read more";
+            const actionLabel =
+                item.available && !borrowedByMe
+                    ? "Read more / Borrow"
+                    : "Read more";
 
             return `<li class="catalog-card">
             <h2>${esc(item.title)}</h2>

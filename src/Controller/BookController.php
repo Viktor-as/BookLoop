@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Users;
 use App\Repository\BooksRepository;
+use App\Repository\BorrowsRepository;
 use App\Service\BorrowQuotaPresenter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +15,7 @@ final class BookController extends AbstractController
 {
     public function __construct(
         private readonly BooksRepository $booksRepository,
+        private readonly BorrowsRepository $borrowsRepository,
         private readonly BorrowQuotaPresenter $borrowQuotaPresenter,
     ) {}
 
@@ -32,13 +34,23 @@ final class BookController extends AbstractController
 
         $quota = null;
         $user  = $this->getUser();
-        if ($user instanceof Users && $book['available']) {
+
+        $memberHasActiveBorrow = false;
+        if ($user instanceof Users) {
+            $memberHasActiveBorrow = $this->borrowsRepository->hasActiveBorrowForMemberAndBook(
+                (int) $user->getId(),
+                $book['id'],
+            );
+        }
+
+        if ($user instanceof Users && $book['available'] && !$memberHasActiveBorrow) {
             $quota = $this->borrowQuotaPresenter->forMemberAndBook($user, $book['borrowDaysLimit']);
         }
 
         return $this->render('book/show.html.twig', [
-            'book'  => $book,
-            'quota' => $quota,
+            'book'                     => $book,
+            'quota'                    => $quota,
+            'member_has_active_borrow' => $memberHasActiveBorrow,
         ]);
     }
 }

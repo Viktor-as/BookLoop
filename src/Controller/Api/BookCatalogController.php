@@ -3,7 +3,9 @@
 namespace App\Controller\Api;
 
 use App\Dto\CatalogFilters;
+use App\Entity\Users;
 use App\Repository\BooksRepository;
+use App\Repository\BorrowsRepository;
 use App\Repository\CategoriesRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,6 +22,7 @@ final class BookCatalogController extends AbstractController
     public function __construct(
         private readonly BooksRepository $booksRepository,
         private readonly CategoriesRepository $categoriesRepository,
+        private readonly BorrowsRepository $borrowsRepository,
     ) {}
 
     #[Route('/api/books/catalog', name: 'api_books_catalog', methods: ['GET'])]
@@ -47,6 +50,8 @@ final class BookCatalogController extends AbstractController
         $result = $this->booksRepository->findCatalogPage($filters, $page, $perPage);
         $total  = $result['total'];
         $items  = $result['items'];
+
+        $items = $this->attachBorrowedByMeFlags($items);
 
         $lastPage = (int) max(1, (int) ceil($total / $perPage));
 
@@ -108,5 +113,33 @@ final class BookCatalogController extends AbstractController
         $v = strtolower((string) $raw);
 
         return in_array($v, ['1', 'true', 'on'], true);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $items
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function attachBorrowedByMeFlags(array $items): array
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Users) {
+            foreach ($items as $i => $item) {
+                $items[$i]['borrowedByMe'] = false;
+            }
+
+            return $items;
+        }
+
+        $borrowedIds = array_fill_keys(
+            $this->borrowsRepository->findActiveBorrowedBookIdsForMember((int) $user->getId()),
+            true,
+        );
+
+        foreach ($items as $i => $item) {
+            $items[$i]['borrowedByMe'] = isset($borrowedIds[(int) $item['id']]);
+        }
+
+        return $items;
     }
 }

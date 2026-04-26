@@ -52,6 +52,37 @@
     margin-bottom: 0.75rem;
 }
 
+.book-borrow-feedback {
+    margin-bottom: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+.book-borrow-feedback.is-hidden {
+    display: none;
+}
+
+.book-borrow-feedback--success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.book-borrow-feedback--error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.book-borrow-active {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.5;
+    margin: 0;
+}
+
 .book-borrow-hint {
     font-size: 0.875rem;
     color: #64748b;

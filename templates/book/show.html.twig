@@ -29,7 +29,9 @@
                 <span class="catalog-meta-value">{{ book.copiesTotal }} total, {{ book.activeBorrows }} on loan</span>
             </div>
         </div>
-        {% if book.available %}
+        {% if member_has_active_borrow %}
+            <span class="catalog-status self-borrowed">Already borrowed by you</span>
+        {% elseif book.available %}
             <span class="catalog-status available">Available to borrow</span>
         {% else %}
             <span class="catalog-status unavailable">All copies borrowed</span>
@@ -38,14 +40,18 @@
 
     <aside class="book-detail-card book-borrow-card">
         <h2>Borrow</h2>
-        {% if not book.available %}
+        <div id="book-borrow-feedback" class="book-borrow-feedback is-hidden" role="status" aria-live="polite"></div>
+
+        {% if app.user and member_has_active_borrow %}
+            <p class="book-borrow-active">This book is already borrowed by you.</p>
+        {% elseif not book.available %}
             <p class="book-borrow-unavailable">Sorry — all copies of this book are currently on loan. Please check back later.</p>
         {% elseif app.user %}
             <p class="book-borrow-hint">
                 Maximum borrow length for this book: <strong>{{ quota.effectiveMaxBorrowDays }}</strong> day(s).<br>
                 You may borrow up to <strong>{{ quota.remainingBorrowSlots }}</strong> more book(s) (limit {{ quota.effectiveBorrowLimit }}, {{ quota.activeBorrowCount }} active).
             </p>
-            <form class="book-borrow-form" action="#" method="post" id="book-borrow-form">
+            <form class="book-borrow-form" action="#" method="post" id="book-borrow-form" data-borrow-slug="{{ book.slug }}">
                 <div>
                     <label for="borrow-days">Days to borrow</label>
                     <input type="number" id="borrow-days" name="days" min="1" max="{{ quota.effectiveMaxBorrowDays }}" value="{{ quota.effectiveMaxBorrowDays }}">
@@ -57,4 +63,10 @@
         {% endif %}
     </aside>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {% if app.user and book.available and not member_has_active_borrow %}
+        <script src="{{ asset('js/book-borrow.js') }}" defer></script>
+    {% endif %}
 {% endblock %}

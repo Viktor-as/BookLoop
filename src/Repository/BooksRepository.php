@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Dto\CatalogFilters;
 use App\Entity\Books;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -208,5 +209,15 @@ class BooksRepository extends ServiceEntityRepository
             'available'        => (bool) (int) $row['available'],
             'borrowDaysLimit'  => $row['borrowDaysLimit'] !== null ? (int) $row['borrowDaysLimit'] : null,
         ];
+    }
+
+    public function findOneBySlugForUpdate(string $slug): ?Books
+    {
+        return $this->createQueryBuilder('b')
+            ->andWhere('b.slug = :slug')
+            ->setParameter('slug', $slug)
+            ->getQuery()
+            ->setLockMode(LockMode::PESSIMISTIC_WRITE)
+            ->getOneOrNullResult();
     }
 }

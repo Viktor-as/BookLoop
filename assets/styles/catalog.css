@@ -241,6 +241,11 @@
     color: #991b1b;
 }
 
+.catalog-status.self-borrowed {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
 .catalog-card-action {
     display: inline-flex;
     align-items: center;
