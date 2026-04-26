@@ -24,17 +24,13 @@
                 <span class="catalog-meta-label">Categories</span>
                 <span class="catalog-meta-value">{{ book.categories ?? '—' }}</span>
             </div>
-            <div class="catalog-meta-item">
-                <span class="catalog-meta-label">Copies</span>
-                <span class="catalog-meta-value">{{ book.copiesTotal }} total, {{ book.activeBorrows }} on loan</span>
-            </div>
         </div>
         {% if member_has_active_borrow %}
             <span class="catalog-status self-borrowed">Already borrowed by you</span>
         {% elseif book.available %}
             <span class="catalog-status available">Available to borrow</span>
         {% else %}
-            <span class="catalog-status unavailable">All copies borrowed</span>
+            <span class="catalog-status unavailable">On loan</span>
         {% endif %}
     </article>
 
@@ -45,7 +41,7 @@
         {% if app.user and member_has_active_borrow %}
             <p class="book-borrow-active">This book is already borrowed by you.</p>
         {% elseif not book.available %}
-            <p class="book-borrow-unavailable">Sorry — all copies of this book are currently on loan. Please check back later.</p>
+            <p class="book-borrow-unavailable">Sorry — this book is currently on loan. Please check back later.</p>
         {% elseif app.user %}
             <p class="book-borrow-hint">
                 Maximum borrow length for this book: <strong>{{ quota.effectiveMaxBorrowDays }}</strong> day(s).<br>

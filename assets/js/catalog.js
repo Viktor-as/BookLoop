@@ -117,7 +117,7 @@ function renderList(items) {
                 statusLabel = "Available to borrow";
             } else {
                 statusClass = "unavailable";
-                statusLabel = "All copies borrowed";
+                statusLabel = "On loan";
             }
 
             const slug =
@@ -142,10 +142,6 @@ function renderList(items) {
                 <div class="catalog-meta-item">
                     <span class="catalog-meta-label">Categories</span>
                     <span class="catalog-meta-value">${esc(categories)}</span>
-                </div>
-                <div class="catalog-meta-item">
-                    <span class="catalog-meta-label">Copies</span>
-                    <span class="catalog-meta-value">${item.copiesTotal} total, ${item.activeBorrows} on loan</span>
                 </div>
             </div>
             <div class="catalog-card-footer">

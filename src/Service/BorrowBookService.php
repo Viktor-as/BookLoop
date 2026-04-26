@@ -29,20 +29,20 @@ final class BorrowBookService
             $memberId = (int) $user->getId();
             $bookId    = (int) $book->getId();
 
-            if ($this->borrowsRepository->hasActiveBorrowForMemberAndBook($memberId, $bookId)) {
-                return new BorrowBookResult(
-                    false,
-                    'You already have an active loan for this book.',
-                    'already_borrowed',
-                );
-            }
-
             $loansForBook = $this->borrowsRepository->countActiveLoansForBook($bookId);
-            if ($loansForBook >= $book->getCopiesTotal()) {
+            if ($loansForBook > 0) {
+                if ($this->borrowsRepository->hasActiveBorrowForMemberAndBook($memberId, $bookId)) {
+                    return new BorrowBookResult(
+                        false,
+                        'You already have an active loan for this book.',
+                        'already_borrowed',
+                    );
+                }
+
                 return new BorrowBookResult(
                     false,
-                    'No copies are available to borrow right now.',
-                    'no_copies',
+                    'This book is currently on loan to another member.',
+                    'on_loan',
                 );
             }
 

@@ -54,18 +54,10 @@ class BooksRepository extends ServiceEntityRepository
                 b.id,
                 b.slug,
                 b.title,
-                b.copies_total AS copiesTotal,
                 (
-                    SELECT COUNT(*)
-                    FROM borrows br
-                    WHERE br.book_id = b.id AND br.returned_at IS NULL
-                ) AS activeBorrows,
-                (
-                    b.copies_total > (
-                        SELECT COUNT(*)
-                        FROM borrows br2
-                        WHERE br2.book_id = b.id AND br2.returned_at IS NULL
-                    )
+                    (SELECT COUNT(*)
+                     FROM borrows br0
+                     WHERE br0.book_id = b.id AND br0.returned_at IS NULL) = 0
                 ) AS available,
                 GROUP_CONCAT(DISTINCT CONCAT(a.first_name, ' ', a.last_name) ORDER BY a.id SEPARATOR ', ') AS authors,
                 GROUP_CONCAT(DISTINCT c.name ORDER BY c.id SEPARATOR ', ') AS categories
@@ -75,7 +67,7 @@ class BooksRepository extends ServiceEntityRepository
             LEFT JOIN book_category bc ON bc.book_id = b.id
             LEFT JOIN categories c ON c.id = bc.category_id
             WHERE {$whereSql}
-            GROUP BY b.id, b.slug, b.title, b.copies_total
+            GROUP BY b.id, b.slug, b.title
             ORDER BY b.id ASC
             LIMIT :limit OFFSET :offset
             SQL;
@@ -90,8 +82,6 @@ class BooksRepository extends ServiceEntityRepository
                 'title'         => (string) $row['title'],
                 'authors'       => $row['authors'] !== null && $row['authors'] !== '' ? (string) $row['authors'] : null,
                 'categories'    => $row['categories'] !== null && $row['categories'] !== '' ? (string) $row['categories'] : null,
-                'copiesTotal'   => (int) $row['copiesTotal'],
-                'activeBorrows' => (int) $row['activeBorrows'],
                 'available'     => (bool) (int) $row['available'],
             ];
         }
@@ -135,8 +125,8 @@ class BooksRepository extends ServiceEntityRepository
         }
 
         if ($filters->onlyAvailable) {
-            $parts[] = 'b.copies_total > (
-                SELECT COUNT(*) FROM borrows br_f
+            $parts[] = 'NOT EXISTS (
+                SELECT 1 FROM borrows br_f
                 WHERE br_f.book_id = b.id AND br_f.returned_at IS NULL
             )';
         }
@@ -153,8 +143,6 @@ class BooksRepository extends ServiceEntityRepository
      *     title: string,
      *     authors: string|null,
      *     categories: string|null,
-     *     copiesTotal: int,
-     *     activeBorrows: int,
      *     available: bool,
      *     borrowDaysLimit: int|null
      * }|null
@@ -169,18 +157,10 @@ class BooksRepository extends ServiceEntityRepository
                 b.slug,
                 b.title,
                 b.borrow_days_limit AS borrowDaysLimit,
-                b.copies_total AS copiesTotal,
                 (
-                    SELECT COUNT(*)
-                    FROM borrows br
-                    WHERE br.book_id = b.id AND br.returned_at IS NULL
-                ) AS activeBorrows,
-                (
-                    b.copies_total > (
-                        SELECT COUNT(*)
-                        FROM borrows br2
-                        WHERE br2.book_id = b.id AND br2.returned_at IS NULL
-                    )
+                    (SELECT COUNT(*)
+                     FROM borrows br0
+                     WHERE br0.book_id = b.id AND br0.returned_at IS NULL) = 0
                 ) AS available,
                 GROUP_CONCAT(DISTINCT CONCAT(a.first_name, ' ', a.last_name) ORDER BY a.id SEPARATOR ', ') AS authors,
                 GROUP_CONCAT(DISTINCT c.name ORDER BY c.id SEPARATOR ', ') AS categories
@@ -190,7 +170,7 @@ class BooksRepository extends ServiceEntityRepository
             LEFT JOIN book_category bc ON bc.book_id = b.id
             LEFT JOIN categories c ON c.id = bc.category_id
             WHERE b.slug = :slug
-            GROUP BY b.id, b.slug, b.title, b.borrow_days_limit, b.copies_total
+            GROUP BY b.id, b.slug, b.title, b.borrow_days_limit
             SQL;
 
         $row = $conn->fetchAssociative($sql, ['slug' => $slug], ['slug' => ParameterType::STRING]);
@@ -204,8 +184,6 @@ class BooksRepository extends ServiceEntityRepository
             'title'            => (string) $row['title'],
             'authors'          => $row['authors'] !== null && $row['authors'] !== '' ? (string) $row['authors'] : null,
             'categories'       => $row['categories'] !== null && $row['categories'] !== '' ? (string) $row['categories'] : null,
-            'copiesTotal'      => (int) $row['copiesTotal'],
-            'activeBorrows'    => (int) $row['activeBorrows'],
             'available'        => (bool) (int) $row['available'],
             'borrowDaysLimit'  => $row['borrowDaysLimit'] !== null ? (int) $row['borrowDaysLimit'] : null,
         ];

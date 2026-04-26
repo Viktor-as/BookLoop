@@ -24,9 +24,6 @@ class Books
     private ?int $borrowDaysLimit = null;
 
     #[ORM\Column]
-    private int $copiesTotal = 1;
-
-    #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
     #[ORM\Column]
@@ -69,18 +66,6 @@ class Books
     public function setBorrowDaysLimit(?int $borrowDaysLimit): static
     {
         $this->borrowDaysLimit = $borrowDaysLimit;
-
-        return $this;
-    }
-
-    public function getCopiesTotal(): int
-    {
-        return $this->copiesTotal;
-    }
-
-    public function setCopiesTotal(int $copiesTotal): static
-    {
-        $this->copiesTotal = $copiesTotal;
 
         return $this;
     }

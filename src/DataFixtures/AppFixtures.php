@@ -140,12 +140,6 @@ class AppFixtures extends Fixture
                 $book->setBorrowDaysLimit(null);
             }
 
-            if ($i % 8 === 0) {
-                $book->setCopiesTotal(2 + ($i % 3));
-            } else {
-                $book->setCopiesTotal(1);
-            }
-
             $manager->persist($book);
             $books[] = $book;
         }
