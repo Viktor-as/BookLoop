@@ -5,9 +5,11 @@ namespace App\Service;
 use App\Dto\BorrowBookResult;
 use App\Entity\Borrows;
 use App\Entity\Users;
+use App\Event\Borrowing\BookBorrowed;
 use App\Repository\BooksRepository;
 use App\Repository\BorrowsRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class BorrowBookService
 {
@@ -16,6 +18,7 @@ final class BorrowBookService
         private readonly BooksRepository $booksRepository,
         private readonly BorrowsRepository $borrowsRepository,
         private readonly BorrowQuotaPresenter $borrowQuotaPresenter,
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {}
 
     public function borrow(Users $user, string $slug, int $days): BorrowBookResult
@@ -75,12 +78,16 @@ final class BorrowBookService
                 ->setReturnedAt(null);
 
             $em->persist($borrow);
+            $em->flush();
+
+            $this->eventDispatcher->dispatch(new BookBorrowed($borrow));
 
             return new BorrowBookResult(
                 true,
                 'Book borrowed successfully.',
                 null,
                 $due,
+                (int) $borrow->getId(),
             );
         });
     }

@@ -2,43 +2,60 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\Users;
+use App\Api\BorrowingItemJson;
 use App\Repository\BorrowsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class MyBorrowedBooksController extends AbstractController
 {
+    use ApiControllerTrait;
+
     public function __construct(private readonly BorrowsRepository $borrowsRepository) {}
 
     #[Route('/api/me/borrowed-books', name: 'api_me_borrowed_books', methods: ['GET'])]
-    public function __invoke(): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
-        $user = $this->getUser();
-        if (!$user instanceof Users) {
-            return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
+        $user = $this->requireUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
-        $rows = $this->borrowsRepository->findBorrowHistoryCatalogRowsForMember((int) $user->getId());
-
-        $items = [];
-        foreach ($rows as $row) {
-            $items[] = [
-                'borrowId'   => $row['borrowId'],
-                'bookId'     => $row['bookId'],
-                'slug'       => $row['slug'],
-                'title'      => $row['title'],
-                'authors'    => $row['authors'],
-                'categories' => $row['categories'],
-                'borrowedAt' => $row['borrowedAt']->format(\DateTimeInterface::ATOM),
-                'dueDate'    => $row['dueDate']->format(\DateTimeInterface::ATOM),
-                'returnedAt' => $row['returnedAt']?->format(\DateTimeInterface::ATOM),
-                'isActive'   => $row['isActive'],
-            ];
+        $page    = (int) $request->query->get('page', '1');
+        $perPage = (int) $request->query->get('perPage', '20');
+        if ($page < 1) {
+            $page = 1;
+        }
+        if ($perPage < 1) {
+            $perPage = 1;
+        }
+        if ($perPage > 100) {
+            $perPage = 100;
         }
 
-        return $this->json(['items' => $items]);
+        $data = $this->borrowsRepository->findBorrowHistoryCatalogPageForMember(
+            (int) $user->getId(),
+            $page,
+            $perPage,
+        );
+
+        $items = array_map(
+            static fn (array $row) => BorrowingItemJson::encodeItem($row),
+            $data['items'],
+        );
+
+        return $this->json(
+            [
+                'items'   => $items,
+                'page'    => $page,
+                'perPage' => $perPage,
+                'total'   => $data['total'],
+            ],
+            Response::HTTP_OK,
+            ['Content-Type' => 'application/json; charset=UTF-8'],
+        );
     }
 }

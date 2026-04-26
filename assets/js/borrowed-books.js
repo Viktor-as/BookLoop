@@ -174,20 +174,22 @@
                 data = {};
             }
 
+            const errText =
+                data.detail ||
+                data.message ||
+                (res.status === 401
+                    ? "Please sign in to see your borrowed books."
+                    : "Could not load your borrowed books.");
+
             if (res.status === 401) {
                 loadingEl.style.display = "none";
-                showError(
-                    data.message ||
-                        "Please sign in to see your borrowed books.",
-                );
+                showError(errText);
                 return;
             }
 
             if (!res.ok) {
                 loadingEl.style.display = "none";
-                showError(
-                    data.message || "Could not load your borrowed books.",
-                );
+                showError(errText);
                 return;
             }
 
@@ -246,9 +248,11 @@
             }
 
             if (!res.ok) {
-                showError(
-                    data.message || "Could not return this book. Try again.",
-                );
+                const msg =
+                    data.detail ||
+                    data.message ||
+                    "Could not return this book. Try again.";
+                showError(msg);
                 btn.disabled = false;
                 return;
             }

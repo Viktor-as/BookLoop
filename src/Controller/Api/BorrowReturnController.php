@@ -2,9 +2,11 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\Users;
+use App\Api\ApiProblem;
+use App\Api\BorrowingItemJson;
+use App\Dto\ReturnBookResult;
 use App\Repository\BorrowsRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\ReturnBookService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,9 +14,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class BorrowReturnController extends AbstractController
 {
+    use ApiControllerTrait;
+
     public function __construct(
+        private readonly ReturnBookService $returnBookService,
         private readonly BorrowsRepository $borrowsRepository,
-        private readonly EntityManagerInterface $entityManager,
     ) {}
 
     #[Route(
@@ -25,27 +29,60 @@ final class BorrowReturnController extends AbstractController
     )]
     public function __invoke(int $id): JsonResponse
     {
-        $user = $this->getUser();
-        if (!$user instanceof Users) {
-            return $this->json(['message' => 'Authentication required.'], Response::HTTP_UNAUTHORIZED);
+        $user = $this->requireUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
-        $borrow = $this->borrowsRepository->find($id);
-        if ($borrow === null) {
-            return $this->json(['message' => 'Borrow not found.'], Response::HTTP_NOT_FOUND);
+        $result = $this->returnBookService->returnForMember($user, $id);
+        if (!$result->ok) {
+            return $this->jsonProblem($this->apiProblemForReturnResult($result));
         }
 
-        if ((int) $borrow->getMember()?->getId() !== (int) $user->getId()) {
-            return $this->json(['message' => 'You cannot return this loan.'], Response::HTTP_FORBIDDEN);
-        }
+        $row = $this->borrowsRepository->findBorrowHistoryCatalogRowByIdForMember(
+            $id,
+            (int) $user->getId(),
+        );
 
-        if (!$borrow->isActive()) {
-            return $this->json(['message' => 'This book has already been returned.'], Response::HTTP_BAD_REQUEST);
-        }
+        $payload = [
+            'message' => $result->message,
+            'item'    => $row ? BorrowingItemJson::encodeItem($row) : null,
+        ];
 
-        $borrow->setReturnedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        return $this->json($payload, Response::HTTP_OK, [
+            'Content-Type' => 'application/json; charset=UTF-8',
+        ]);
+    }
 
-        return $this->json(['message' => 'Book returned successfully.']);
+    private function apiProblemForReturnResult(ReturnBookResult $r): ApiProblem
+    {
+        $code = (string) ($r->errorCode ?? 'unknown');
+
+        return match ($code) {
+            'borrow_not_found' => new ApiProblem(
+                status: Response::HTTP_NOT_FOUND,
+                code: 'borrow_not_found',
+                title: 'Borrow not found',
+                detail: $r->message,
+            ),
+            'return_forbidden' => new ApiProblem(
+                status: Response::HTTP_FORBIDDEN,
+                code: 'return_forbidden',
+                title: 'Not allowed to return this loan',
+                detail: $r->message,
+            ),
+            'already_returned' => new ApiProblem(
+                status: Response::HTTP_CONFLICT,
+                code: 'already_returned',
+                title: 'Already returned',
+                detail: $r->message,
+            ),
+            default => new ApiProblem(
+                status: Response::HTTP_BAD_REQUEST,
+                code: 'return_failed',
+                title: 'Return request failed',
+                detail: $r->message,
+            ),
+        };
     }
 }

@@ -9,6 +9,7 @@ final readonly class BorrowBookResult
         public string $message,
         public ?string $errorCode = null,
         public ?\DateTimeImmutable $dueDate = null,
+        public ?int $borrowId = null,
     ) {}
 
     public static function notFound(): self

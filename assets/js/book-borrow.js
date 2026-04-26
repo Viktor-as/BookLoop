@@ -100,7 +100,9 @@
 
             if (res.status === 401) {
                 showFeedback(
-                    data.message || "Please log in again to borrow this book.",
+                    data.detail ||
+                        data.message ||
+                        "Please log in again to borrow this book.",
                     "error",
                 );
                 submitBtn.disabled = false;
@@ -108,10 +110,13 @@
             }
 
             if (!res.ok) {
-                showFeedback(
-                    data.message || "Could not complete the borrow request.",
-                    "error",
-                );
+                const msg =
+                    data.detail ||
+                    data.message ||
+                    (data.code
+                        ? "Could not complete the borrow request (" + data.code + ")."
+                        : "Could not complete the borrow request.");
+                showFeedback(msg, "error");
                 submitBtn.disabled = false;
                 return;
             }
