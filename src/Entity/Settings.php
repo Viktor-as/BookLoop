@@ -14,7 +14,7 @@ class Settings
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100, unique: true)]
+    #[ORM\Column(name: 'setting_key', length: 100, unique: true)]
     private ?string $key = null;
 
     #[ORM\Column(type: 'text')]

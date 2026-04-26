@@ -1,0 +1,42 @@
+.error-panel {
+    max-width: 520px;
+    margin: 4rem auto;
+    padding: 2rem 2.25rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+}
+
+.error-panel h1 {
+    font-size: 1.35rem;
+    margin-bottom: .75rem;
+    color: #1a1a2e;
+}
+
+.error-panel p {
+    color: #555;
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+}
+
+.error-panel .hint {
+    font-size: .85rem;
+    color: #888;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+    margin-top: .5rem;
+}
+
+.error-panel a {
+    display: inline-block;
+    margin-top: .5rem;
+    padding: .55rem 1.1rem;
+    background: #4f46e5;
+    color: #fff !important;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: .95rem;
+}
+
+.error-panel a:hover { background: #4338ca; }

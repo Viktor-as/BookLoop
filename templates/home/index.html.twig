@@ -1,6 +1,53 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}BookLoop{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/catalog.css') }}">
+{% endblock %}
+
 {% block body %}
-<h1>Welcome</h1>
-<a href="{{ path('product_index') }}">Products page</a>
+<div class="catalog-header">
+    <h1>Book catalog</h1>
+    <p>Browse titles, authors, categories, and whether a copy is free to borrow.</p>
+</div>
+
+<form id="catalog-filters" class="catalog-filters" action="/" method="get" aria-label="Catalog filters">
+    <div class="catalog-filters-grid">
+        <div class="catalog-filters-field">
+            <label for="filter-q">Title</label>
+            <input type="search" id="filter-q" name="q" autocomplete="off" placeholder="Part of title">
+        </div>
+        <div class="catalog-filters-field">
+            <label for="filter-author">Author</label>
+            <input type="search" id="filter-author" name="author" autocomplete="off" placeholder="Author name">
+        </div>
+        <div class="catalog-filters-field">
+            <label for="filter-category">Category</label>
+            <select id="filter-category" name="category">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="catalog-filters-field catalog-filters-field-checkbox">
+            <input type="checkbox" id="filter-available" name="available" value="1">
+            <label for="filter-available">Only show available</label>
+        </div>
+    </div>
+    <div class="catalog-filters-actions">
+        <button type="submit" class="catalog-filters-apply">Apply</button>
+        <button type="button" id="catalog-filters-clear" class="catalog-filters-clear">Clear</button>
+    </div>
+</form>
+
+<div id="catalog-error" class="catalog-error" style="display:none;"></div>
+<div id="catalog-loading" class="catalog-loading">Loading catalog…</div>
+<ul id="catalog-list" class="catalog-list" aria-live="polite"></ul>
+<div id="catalog-pagination" class="catalog-pagination" role="navigation" aria-label="Catalog pagination"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/catalog.js') }}"></script>
 {% endblock %}

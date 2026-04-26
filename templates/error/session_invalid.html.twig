@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session invalid — Library</title>
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/error.css') }}">
+</head>
+<body>
+    <nav class="site-nav">
+        <a href="{{ path('home') }}" class="brand">📚 Library</a>
+        <a href="{{ path('login_page') }}">Login</a>
+        <a href="{{ path('register_page') }}" class="btn-primary">Register</a>
+    </nav>
+
+    <main>
+        <div class="error-panel">
+            <h1>We couldn’t sign you in</h1>
+            <p>
+                Your saved login is no longer valid. This often happens after the database was reset,
+                demo data was reloaded, or your account was removed.
+            </p>
+            <p>Your session cookies have been cleared — you can sign in again safely.</p>
+            <a href="{{ path('login_page') }}">Go to login</a>
+            {% if app.debug %}
+                <p class="hint">Details: {{ technicalMessage }}</p>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

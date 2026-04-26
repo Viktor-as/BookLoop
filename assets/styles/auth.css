@@ -1,0 +1,129 @@
+.auth-card {
+    max-width: 480px;
+    margin: 3rem auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    width: 100%;
+}
+
+.auth-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.auth-sub {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.8rem;
+}
+
+.auth-sub a {
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.4rem;
+}
+
+.form-group label small {
+    font-weight: 400;
+    color: #999;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding-right: 2.8rem;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #999;
+    display: flex;
+    align-items: center;
+    transition: color .15s;
+}
+
+.toggle-password:hover { color: #4f46e5; }
+
+.eye-icon,
+.eye-off-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.15s;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #4f46e5;
+}
+
+.form-group input.is-invalid {
+    border-color: #dc2626;
+}
+
+.field-error {
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    min-height: 1rem;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.15s;
+}
+
+.btn-submit:hover {
+    background: #4338ca;
+}
+.btn-submit:disabled {
+    background: #a5b4fc;
+    cursor: not-allowed;
+}

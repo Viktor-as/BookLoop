@@ -1,5 +1,6 @@
 
 ###> symfony/framework-bundle ###
+/.cursor/
 /.env
 /.env.dev
 /.env.local
@@ -10,3 +11,12 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
