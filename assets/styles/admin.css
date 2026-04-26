@@ -1,0 +1,463 @@
+.admin-layout {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-height: calc(100vh - 56px);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .admin-layout {
+        flex-direction: column;
+    }
+}
+
+.admin-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1.25rem 0;
+}
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 100%;
+        padding: 0.75rem 0;
+    }
+}
+
+.admin-sidebar-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    padding: 0 1.25rem 0.5rem;
+}
+
+.admin-sidebar nav a {
+    display: block;
+    padding: 0.5rem 1.25rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-left: 3px solid transparent;
+}
+
+.admin-sidebar nav a:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.admin-sidebar nav a.active {
+    background: rgba(79, 70, 229, 0.2);
+    color: #fff;
+    border-left-color: #818cf8;
+}
+
+.admin-main {
+    flex: 1;
+    padding: 1.25rem 2rem 2rem;
+    background: #f8fafc;
+    min-width: 0;
+}
+
+.admin-flashes:not(:has(.admin-flash)) {
+    display: none;
+}
+
+.admin-flashes .admin-flash {
+    margin-bottom: 0.65rem;
+}
+
+.admin-flashes .admin-flash:last-child {
+    margin-bottom: 1.15rem;
+}
+
+.admin-main h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #0f172a;
+}
+
+.admin-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-table th {
+    background: #f1f5f9;
+    font-weight: 600;
+    color: #475569;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.admin-table-actions form {
+    display: inline;
+}
+
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.admin-btn-primary {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4338ca;
+}
+
+.admin-btn-primary:hover {
+    background: #4338ca;
+}
+
+.admin-btn-secondary {
+    background: #fff;
+    color: #4338ca;
+    border-color: #c7d2fe;
+}
+
+.admin-btn-secondary:hover {
+    background: #eef2ff;
+}
+
+.admin-btn-danger {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.admin-btn-danger:hover {
+    background: #fee2e2;
+}
+
+.admin-form {
+    max-width: 40rem;
+    background: #fff;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.admin-form-row {
+    margin-bottom: 1rem;
+}
+
+/* Only the row heading — not labels inside widgets (e.g. choice checkboxes). */
+.admin-form-row > label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #334155;
+    margin-bottom: 0.35rem;
+}
+
+.admin-form-row input[type="text"],
+.admin-form-row input[type="email"],
+.admin-form-row input[type="number"],
+.admin-form-row input[type="password"],
+.admin-form-row textarea,
+.admin-form-row select {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.admin-form-row textarea {
+    min-height: 6rem;
+    resize: vertical;
+}
+
+/* Password reveal (admin user form — same pattern as auth login/register). */
+.admin-form .admin-password-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+
+.admin-form .admin-password-wrapper > input[type="password"],
+.admin-form .admin-password-wrapper > input[type="text"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.5rem 2.75rem 0.5rem 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.admin-form .admin-toggle-password {
+    position: absolute;
+    right: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+    line-height: 0;
+}
+
+.admin-form .admin-toggle-password:hover {
+    color: #4f46e5;
+}
+
+.admin-form .admin-toggle-password:focus-visible {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.admin-form .admin-toggle-password .eye-icon,
+.admin-form .admin-toggle-password .eye-off-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* Top-of-form error summary (single box at top of .admin-form). */
+.admin-form-errors {
+    margin-bottom: 1rem;
+    padding: 0.75rem 0.85rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #991b1b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.admin-form-errors p {
+    color: #991b1b;
+    margin: 0;
+    font-weight: 600;
+}
+
+.admin-form-errors ul,
+.admin-form-errors li {
+    color: #991b1b;
+    font-weight: 600;
+}
+
+.admin-form-errors ul {
+    margin: 0.35rem 0 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.admin-form-errors li + li {
+    margin-top: 0.25rem;
+}
+
+/* Bootstrap 5 form theme: form_errors() uses <div class="alert alert-danger"> (root) or
+   <div class="invalid-feedback"> (fields), not <ul><li> — we do not load Bootstrap CSS. */
+.admin-form-errors > .alert.alert-danger,
+.admin-form-errors > .invalid-feedback {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: #991b1b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.admin-form-errors > .alert.alert-danger + .alert.alert-danger,
+.admin-form-errors > .invalid-feedback + .invalid-feedback,
+.admin-form-errors > .alert.alert-danger + .invalid-feedback,
+.admin-form-errors > .invalid-feedback + .alert.alert-danger {
+    margin-top: 0.4rem;
+}
+
+.admin-form .invalid-feedback,
+.admin-form .invalid-feedback.d-block {
+    display: block;
+    margin-top: 0.4rem;
+    color: #991b1b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Field-level form_errors() after widgets in admin form rows */
+.admin-form .admin-form-row > ul {
+    margin: 0.4rem 0 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.admin-form .admin-form-row > ul > li {
+    color: #991b1b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.admin-form .admin-form-row > ul > li + li {
+    margin-top: 0.25rem;
+}
+
+/* Bootstrap theme adds is-invalid on invalid widgets */
+.admin-form input.is-invalid,
+.admin-form textarea.is-invalid,
+.admin-form select.is-invalid {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.admin-stat-card strong {
+    display: block;
+    font-size: 1.5rem;
+    color: #4f46e5;
+}
+
+.admin-stat-card span {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.admin-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.28rem;
+    max-height: 14rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    background: #fff;
+}
+
+.admin-checkbox-list .form-check {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Grouped choices (e.g. group_by) use fieldsets — stack rows inside them. */
+.admin-checkbox-list fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+
+.admin-checkbox-list label,
+.admin-checkbox-list .form-check-label {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    font-weight: 400;
+    cursor: pointer;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.admin-checkbox-list > input[type="checkbox"] + label {
+    margin: 0;
+}
+
+.admin-checkbox-list:where(:not(:has(.form-check))) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.5rem;
+    row-gap: 0.28rem;
+    align-items: center;
+}
+
+.admin-checkbox-list:where(:not(:has(.form-check))) > label {
+    flex: unset;
+}
+
+.admin-checkbox-list input[type="checkbox"],
+.admin-checkbox-list .form-check-input {
+    width: auto;
+    height: auto;
+    flex-shrink: 0;
+    margin: 0;
+    float: none;
+    accent-color: #4f46e5;
+}

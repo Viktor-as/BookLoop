@@ -13,6 +13,9 @@
             <div>
                 <a href="{{ path('home') }}" class="brand">📚 Library</a>
                 <a href="{{ path('home') }}" {% if app.request.attributes.get('_route') == 'home' %}class="active"{% endif %}>Catalog</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_dashboard') }}" {% if app.request.pathInfo starts with '/admin' %}class="active"{% endif %}>Admin</a>
+                {% endif %}
                 {% if app.user %}
                     <a href="{{ path('borrowed_books') }}" {% if app.request.attributes.get('_route') == 'borrowed_books' %}class="active"{% endif %}>Borrowed books</a>
                 {% endif %}
@@ -28,12 +31,14 @@
             </div>
         </nav>
 
-        <main>
-            {% for type, messages in app.flashes(['success', 'error']) %}
-                {% for message in messages %}
-                    <div class="flash {{ type }}">{{ message }}</div>
+        <main class="{% block main_class %}{% if app.request.pathInfo starts with '/admin' %}main--admin{% endif %}{% endblock %}">
+            {% block flashes %}
+                {% for type, messages in app.flashes(['success', 'error']) %}
+                    {% for message in messages %}
+                        <div class="flash {{ type }}">{{ message }}</div>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
+            {% endblock %}
 
             {% block body %}{% endblock %}
         </main>

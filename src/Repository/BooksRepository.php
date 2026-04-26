@@ -67,8 +67,8 @@ class BooksRepository extends ServiceEntityRepository
             LEFT JOIN book_category bc ON bc.book_id = b.id
             LEFT JOIN categories c ON c.id = bc.category_id
             WHERE {$whereSql}
-            GROUP BY b.id, b.slug, b.title
-            ORDER BY b.id ASC
+            GROUP BY b.id, b.slug, b.title, b.updated_at
+            ORDER BY b.updated_at DESC, b.id DESC
             LIMIT :limit OFFSET :offset
             SQL;
 

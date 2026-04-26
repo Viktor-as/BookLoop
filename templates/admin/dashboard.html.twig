@@ -1,0 +1,16 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Dashboard{% endblock %}
+
+{% block admin_main %}
+    <h1>Admin dashboard</h1>
+    <p style="color:#64748b;margin-bottom:1.25rem;">Manage catalog data and users. Use the sidebar to open each section.</p>
+
+    <div class="admin-stats">
+        <div class="admin-stat-card"><strong>{{ counts.authors }}</strong><span>Authors</span></div>
+        <div class="admin-stat-card"><strong>{{ counts.categories }}</strong><span>Categories</span></div>
+        <div class="admin-stat-card"><strong>{{ counts.books }}</strong><span>Books</span></div>
+        <div class="admin-stat-card"><strong>{{ counts.settings }}</strong><span>Settings</span></div>
+        <div class="admin-stat-card"><strong>{{ counts.users }}</strong><span>Users</span></div>
+    </div>
+{% endblock %}

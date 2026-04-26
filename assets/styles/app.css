@@ -88,6 +88,14 @@ main {
     padding: 0 1.5rem;
 }
 
+/* Full-width main (e.g. admin shell with sidebar) */
+main.main--admin {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 /* ── Flash messages ──────────────────────────────────────── */
 
 .flash {

@@ -1,0 +1,41 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Settings{% endblock %}
+
+{% block admin_main %}
+    <div class="admin-toolbar">
+        <h1>Settings</h1>
+        <a href="{{ path('admin_settings_new') }}" class="admin-btn admin-btn-primary">New setting</a>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in settings %}
+                    <tr>
+                        <td>{{ s.id }}</td>
+                        <td><code>{{ s.key }}</code></td>
+                        <td style="max-width:20rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.value }}</td>
+                        <td class="admin-table-actions">
+                            <a href="{{ path('admin_settings_edit', {id: s.id}) }}" class="admin-btn admin-btn-secondary">Edit</a>
+                            <form method="post" action="{{ path('admin_settings_delete', {id: s.id}) }}" onsubmit="return confirm('Delete this setting?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_setting_' ~ s.id) }}">
+                                <button type="submit" class="admin-btn admin-btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4">No settings yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

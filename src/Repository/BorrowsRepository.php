@@ -57,6 +57,26 @@ class BorrowsRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countBorrowsForBook(int $bookId): int
+    {
+        return (int) $this->createQueryBuilder('br')
+            ->select('COUNT(br.id)')
+            ->andWhere('IDENTITY(br.book) = :bookId')
+            ->setParameter('bookId', $bookId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countBorrowsForMember(int $memberId): int
+    {
+        return (int) $this->createQueryBuilder('br')
+            ->select('COUNT(br.id)')
+            ->andWhere('IDENTITY(br.member) = :memberId')
+            ->setParameter('memberId', $memberId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
      * @return list<int>
      */

@@ -12,8 +12,13 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 10)]
 class CsrfProtectionListener
 {
-    private const MUTATING_METHODS  = ['POST', 'PUT', 'PATCH', 'DELETE'];
-    private const EXEMPT_PATH_PREFIX = '/api/auth/';
+    private const MUTATING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
+    /** @var list<string> */
+    private const EXEMPT_PATH_PREFIXES = [
+        '/api/auth/', // public JSON login/register — no XSRF cookie
+        '/admin',      // HTML admin CRUD uses Symfony Form CSRF (_token), not X-XSRF-TOKEN
+    ];
 
     public function __invoke(RequestEvent $event): void
     {
@@ -27,9 +32,11 @@ class CsrfProtectionListener
             return;
         }
 
-        // Auth endpoints are public — no JWT cookie, so no CSRF cookie either.
-        if (str_starts_with($request->getPathInfo(), self::EXEMPT_PATH_PREFIX)) {
-            return;
+        $path = $request->getPathInfo();
+        foreach (self::EXEMPT_PATH_PREFIXES as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                return;
+            }
         }
 
         $cookieToken = $request->cookies->get(AuthCookieService::CSRF_COOKIE_NAME);

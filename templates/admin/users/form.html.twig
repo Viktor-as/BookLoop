@@ -1,0 +1,113 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+
+{% block admin_main %}
+    <h1>{{ title }}</h1>
+    <p style="margin-bottom:1rem;"><a href="{{ path('admin_users_index') }}">← Back to users</a></p>
+
+    {{ form_start(form, {attr: {class: 'admin-form'}}) }}
+    {% if form.vars.submitted and not form.vars.valid %}
+        <div class="admin-form-errors">
+            {{ form_errors(form) }}
+            {% if form.vars.errors|length == 0 %}
+                <p>Please fix the errors below.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+    <div class="admin-form-row">
+        {{ form_label(form.firstName) }}
+        {{ form_widget(form.firstName) }}
+        {{ form_errors(form.firstName) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.lastName) }}
+        {{ form_widget(form.lastName) }}
+        {{ form_errors(form.lastName) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {{ form_errors(form.email) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role) }}
+        {{ form_errors(form.role) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.borrowLimit) }}
+        {{ form_widget(form.borrowLimit) }}
+        {{ form_errors(form.borrowLimit) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.plainPassword.first, title starts with 'Edit' ? 'Password (leave blank to keep current)' : 'Password') }}
+        <div class="admin-password-wrapper">
+            {{ form_widget(form.plainPassword.first) }}
+            <button type="button" class="admin-toggle-password" aria-label="Show password" data-target="{{ form.plainPassword.first.vars.id }}">
+                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+            </button>
+        </div>
+        {{ form_errors(form.plainPassword.first) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.plainPassword.second) }}
+        <div class="admin-password-wrapper">
+            {{ form_widget(form.plainPassword.second) }}
+            <button type="button" class="admin-toggle-password" aria-label="Show password" data-target="{{ form.plainPassword.second.vars.id }}">
+                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+            </button>
+        </div>
+        {{ form_errors(form.plainPassword.second) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_errors(form.plainPassword) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_widget(form.save) }}
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    document.querySelectorAll('.admin-toggle-password').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = btn.getAttribute('data-target');
+            var input = id ? document.getElementById(id) : null;
+            if (!input) {
+                return;
+            }
+            var isText = input.type === 'text';
+            input.type = isText ? 'password' : 'text';
+            var eye = btn.querySelector('.eye-icon');
+            var eyeOff = btn.querySelector('.eye-off-icon');
+            if (eye) {
+                eye.style.display = isText ? 'block' : 'none';
+            }
+            if (eyeOff) {
+                eyeOff.style.display = isText ? 'none' : 'block';
+            }
+            btn.setAttribute('aria-label', isText ? 'Show password' : 'Hide password');
+        });
+    });
+})();
+</script>
+{% endblock %}

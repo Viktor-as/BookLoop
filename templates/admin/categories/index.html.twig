@@ -1,0 +1,41 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Categories{% endblock %}
+
+{% block admin_main %}
+    <div class="admin-toolbar">
+        <h1>Categories</h1>
+        <a href="{{ path('admin_categories_new') }}" class="admin-btn admin-btn-primary">New category</a>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                    <tr>
+                        <td>{{ cat.id }}</td>
+                        <td>{{ cat.name }}</td>
+                        <td><code>{{ cat.slug }}</code></td>
+                        <td class="admin-table-actions">
+                            <a href="{{ path('admin_categories_edit', {id: cat.id}) }}" class="admin-btn admin-btn-secondary">Edit</a>
+                            <form method="post" action="{{ path('admin_categories_delete', {id: cat.id}) }}" onsubmit="return confirm('Delete this category?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_category_' ~ cat.id) }}">
+                                <button type="submit" class="admin-btn admin-btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4">No categories yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

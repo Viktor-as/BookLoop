@@ -1,0 +1,39 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Authors{% endblock %}
+
+{% block admin_main %}
+    <div class="admin-toolbar">
+        <h1>Authors</h1>
+        <a href="{{ path('admin_authors_new') }}" class="admin-btn admin-btn-primary">New author</a>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for author in authors %}
+                    <tr>
+                        <td>{{ author.id }}</td>
+                        <td>{{ author.firstName }} {{ author.lastName }}</td>
+                        <td class="admin-table-actions">
+                            <a href="{{ path('admin_authors_edit', {id: author.id}) }}" class="admin-btn admin-btn-secondary">Edit</a>
+                            <form method="post" action="{{ path('admin_authors_delete', {id: author.id}) }}" onsubmit="return confirm('Delete this author?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_author_' ~ author.id) }}">
+                                <button type="submit" class="admin-btn admin-btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="3">No authors yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

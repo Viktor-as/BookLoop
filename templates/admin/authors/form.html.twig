@@ -1,0 +1,32 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}{{ title }}{% endblock %}
+
+{% block admin_main %}
+    <h1>{{ title }}</h1>
+    <p style="margin-bottom:1rem;"><a href="{{ path('admin_authors_index') }}">← Back to authors</a></p>
+
+    {{ form_start(form, {attr: {class: 'admin-form'}}) }}
+    {% if form.vars.submitted and not form.vars.valid %}
+        <div class="admin-form-errors">
+            {{ form_errors(form) }}
+            {% if form.vars.errors|length == 0 %}
+                <p>Please fix the errors below.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+    <div class="admin-form-row">
+        {{ form_label(form.firstName) }}
+        {{ form_widget(form.firstName) }}
+        {{ form_errors(form.firstName) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_label(form.lastName) }}
+        {{ form_widget(form.lastName) }}
+        {{ form_errors(form.lastName) }}
+    </div>
+    <div class="admin-form-row">
+        {{ form_widget(form.save) }}
+    </div>
+    {{ form_end(form) }}
+{% endblock %}

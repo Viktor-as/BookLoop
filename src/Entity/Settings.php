@@ -4,9 +4,11 @@ namespace App\Entity;
 
 use App\Repository\SettingsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: SettingsRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['key'], message: 'This setting key already exists.')]
 class Settings
 {
     #[ORM\Id]
