@@ -209,6 +209,19 @@
     }
 }
 
+.catalog-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-top: 0.65rem;
+}
+
+.catalog-card-footer .catalog-status {
+    margin-top: 0;
+}
+
 .catalog-status {
     display: inline-block;
     margin-top: .65rem;
@@ -226,6 +239,26 @@
 .catalog-status.unavailable {
     background: #fee2e2;
     color: #991b1b;
+}
+
+.catalog-card-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    margin-left: auto;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: #4f46e5;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid #4338ca;
+}
+
+.catalog-card-action:hover {
+    background: #4338ca;
 }
 
 .catalog-empty {

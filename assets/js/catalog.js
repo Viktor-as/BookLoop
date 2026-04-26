@@ -111,6 +111,17 @@ function renderList(items) {
                 ? "Available to borrow"
                 : "All copies borrowed";
 
+            const slug =
+                typeof item.slug === "string" && item.slug.length > 0
+                    ? item.slug
+                    : "";
+            const detailHref = slug
+                ? `/books/${encodeURIComponent(slug)}`
+                : "#";
+            const actionLabel = item.available
+                ? "Read more / Borrow"
+                : "Read more";
+
             return `<li class="catalog-card">
             <h2>${esc(item.title)}</h2>
             <div class="catalog-meta">
@@ -127,7 +138,10 @@ function renderList(items) {
                     <span class="catalog-meta-value">${item.copiesTotal} total, ${item.activeBorrows} on loan</span>
                 </div>
             </div>
-            <span class="catalog-status ${statusClass}">${esc(statusLabel)}</span>
+            <div class="catalog-card-footer">
+                <span class="catalog-status ${statusClass}">${esc(statusLabel)}</span>
+                <a href="${detailHref}" class="catalog-card-action">${esc(actionLabel)}</a>
+            </div>
         </li>`;
         })
         .join("");

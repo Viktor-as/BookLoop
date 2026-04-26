@@ -1,0 +1,124 @@
+.book-detail-back {
+    margin-bottom: 1rem;
+}
+
+.book-detail-back a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+.book-detail-back a:hover {
+    text-decoration: underline;
+}
+
+.book-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 52rem) {
+    .book-detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.book-detail-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.15rem 1.35rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #eee;
+}
+
+.book-detail-card h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.65rem;
+    line-height: 1.35;
+}
+
+.book-borrow-card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.75rem;
+}
+
+.book-borrow-hint {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.65rem;
+    line-height: 1.45;
+}
+
+.book-borrow-hint strong {
+    color: #334155;
+}
+
+.book-borrow-unavailable {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.book-borrow-guest {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.book-borrow-guest a {
+    color: #4f46e5;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.book-borrow-guest a:hover {
+    text-decoration: underline;
+}
+
+.book-borrow-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.book-borrow-form label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.book-borrow-form input[type="number"] {
+    max-width: 8rem;
+    padding: 0.45rem 0.55rem;
+    font-size: 0.9rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+.book-borrow-submit {
+    align-self: flex-start;
+    min-height: 2.1rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: #4f46e5;
+    border: 1px solid #4338ca;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.book-borrow-submit:hover {
+    background: #4338ca;
+}

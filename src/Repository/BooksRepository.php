@@ -51,6 +51,7 @@ class BooksRepository extends ServiceEntityRepository
         $sql = <<<SQL
             SELECT
                 b.id,
+                b.slug,
                 b.title,
                 b.copies_total AS copiesTotal,
                 (
@@ -73,7 +74,7 @@ class BooksRepository extends ServiceEntityRepository
             LEFT JOIN book_category bc ON bc.book_id = b.id
             LEFT JOIN categories c ON c.id = bc.category_id
             WHERE {$whereSql}
-            GROUP BY b.id, b.title, b.copies_total
+            GROUP BY b.id, b.slug, b.title, b.copies_total
             ORDER BY b.id ASC
             LIMIT :limit OFFSET :offset
             SQL;
@@ -84,6 +85,7 @@ class BooksRepository extends ServiceEntityRepository
         foreach ($rows as $row) {
             $items[] = [
                 'id'            => (int) $row['id'],
+                'slug'          => (string) $row['slug'],
                 'title'         => (string) $row['title'],
                 'authors'       => $row['authors'] !== null && $row['authors'] !== '' ? (string) $row['authors'] : null,
                 'categories'    => $row['categories'] !== null && $row['categories'] !== '' ? (string) $row['categories'] : null,
@@ -139,5 +141,72 @@ class BooksRepository extends ServiceEntityRepository
         }
 
         return [implode(' AND ', $parts), $params, $types];
+    }
+
+    /**
+     * Same shape as a catalog item, plus borrowDaysLimit for the borrow panel.
+     *
+     * @return array{
+     *     id: int,
+     *     slug: string,
+     *     title: string,
+     *     authors: string|null,
+     *     categories: string|null,
+     *     copiesTotal: int,
+     *     activeBorrows: int,
+     *     available: bool,
+     *     borrowDaysLimit: int|null
+     * }|null
+     */
+    public function findCatalogDetailBySlug(string $slug): ?array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = <<<'SQL'
+            SELECT
+                b.id,
+                b.slug,
+                b.title,
+                b.borrow_days_limit AS borrowDaysLimit,
+                b.copies_total AS copiesTotal,
+                (
+                    SELECT COUNT(*)
+                    FROM borrows br
+                    WHERE br.book_id = b.id AND br.returned_at IS NULL
+                ) AS activeBorrows,
+                (
+                    b.copies_total > (
+                        SELECT COUNT(*)
+                        FROM borrows br2
+                        WHERE br2.book_id = b.id AND br2.returned_at IS NULL
+                    )
+                ) AS available,
+                GROUP_CONCAT(DISTINCT CONCAT(a.first_name, ' ', a.last_name) ORDER BY a.id SEPARATOR ', ') AS authors,
+                GROUP_CONCAT(DISTINCT c.name ORDER BY c.id SEPARATOR ', ') AS categories
+            FROM books b
+            LEFT JOIN author_book ab ON ab.book_id = b.id
+            LEFT JOIN authors a ON a.id = ab.author_id
+            LEFT JOIN book_category bc ON bc.book_id = b.id
+            LEFT JOIN categories c ON c.id = bc.category_id
+            WHERE b.slug = :slug
+            GROUP BY b.id, b.slug, b.title, b.borrow_days_limit, b.copies_total
+            SQL;
+
+        $row = $conn->fetchAssociative($sql, ['slug' => $slug], ['slug' => ParameterType::STRING]);
+        if ($row === false) {
+            return null;
+        }
+
+        return [
+            'id'               => (int) $row['id'],
+            'slug'             => (string) $row['slug'],
+            'title'            => (string) $row['title'],
+            'authors'          => $row['authors'] !== null && $row['authors'] !== '' ? (string) $row['authors'] : null,
+            'categories'       => $row['categories'] !== null && $row['categories'] !== '' ? (string) $row['categories'] : null,
+            'copiesTotal'      => (int) $row['copiesTotal'],
+            'activeBorrows'    => (int) $row['activeBorrows'],
+            'available'        => (bool) (int) $row['available'],
+            'borrowDaysLimit'  => $row['borrowDaysLimit'] !== null ? (int) $row['borrowDaysLimit'] : null,
+        ];
     }
 }

@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ book.title }} — BookLoop{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/catalog.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/book.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="book-detail-back">
+    <a href="{{ path('home') }}">← Back to book list</a>
+</div>
+
+<div class="book-detail-layout">
+    <article class="book-detail-card catalog-card">
+        <h1>{{ book.title }}</h1>
+        <div class="catalog-meta">
+            <div class="catalog-meta-item">
+                <span class="catalog-meta-label">Authors</span>
+                <span class="catalog-meta-value">{{ book.authors ?? '—' }}</span>
+            </div>
+            <div class="catalog-meta-item">
+                <span class="catalog-meta-label">Categories</span>
+                <span class="catalog-meta-value">{{ book.categories ?? '—' }}</span>
+            </div>
+            <div class="catalog-meta-item">
+                <span class="catalog-meta-label">Copies</span>
+                <span class="catalog-meta-value">{{ book.copiesTotal }} total, {{ book.activeBorrows }} on loan</span>
+            </div>
+        </div>
+        {% if book.available %}
+            <span class="catalog-status available">Available to borrow</span>
+        {% else %}
+            <span class="catalog-status unavailable">All copies borrowed</span>
+        {% endif %}
+    </article>
+
+    <aside class="book-detail-card book-borrow-card">
+        <h2>Borrow</h2>
+        {% if not book.available %}
+            <p class="book-borrow-unavailable">Sorry — all copies of this book are currently on loan. Please check back later.</p>
+        {% elseif app.user %}
+            <p class="book-borrow-hint">
+                Maximum borrow length for this book: <strong>{{ quota.effectiveMaxBorrowDays }}</strong> day(s).<br>
+                You may borrow up to <strong>{{ quota.remainingBorrowSlots }}</strong> more book(s) (limit {{ quota.effectiveBorrowLimit }}, {{ quota.activeBorrowCount }} active).
+            </p>
+            <form class="book-borrow-form" action="#" method="post" id="book-borrow-form">
+                <div>
+                    <label for="borrow-days">Days to borrow</label>
+                    <input type="number" id="borrow-days" name="days" min="1" max="{{ quota.effectiveMaxBorrowDays }}" value="{{ quota.effectiveMaxBorrowDays }}">
+                </div>
+                <button type="button" class="book-borrow-submit" id="book-borrow-submit">Borrow</button>
+            </form>
+        {% else %}
+            <p class="book-borrow-guest">Please <a href="{{ path('register_page') }}">Register</a> / <a href="{{ path('login_page') }}">Login</a> to borrow this book</p>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

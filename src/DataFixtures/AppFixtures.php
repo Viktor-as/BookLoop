@@ -13,6 +13,7 @@ use App\Entity\Users;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * Demo data for local development and onboarding.
@@ -82,6 +83,7 @@ class AppFixtures extends Fixture
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly SluggerInterface $slugger,
     ) {}
 
     public function load(ObjectManager $manager): void
@@ -128,7 +130,9 @@ class AppFixtures extends Fixture
 
         $books = [];
         for ($i = 0; $i < self::BOOK_COUNT; ++$i) {
-            $book = (new Books())->setTitle(self::BOOK_TITLES[$i]);
+            $title = self::BOOK_TITLES[$i];
+            $slug  = $this->slugger->slug($title)->lower()->toString() . '-' . $i;
+            $book  = (new Books())->setTitle($title)->setSlug($slug);
 
             if ($i % 4 === 0) {
                 $book->setBorrowDaysLimit([7, 14, 21, 28][(int) ($i / 4) % 4]);
