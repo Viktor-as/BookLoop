@@ -1,4 +1,10 @@
-import { esc, getCookie, formatDateLabel, detailHref } from "books_ui_utils";
+import {
+    esc,
+    getCookie,
+    formatDateLabel,
+    detailHref,
+    bindErrorPanel,
+} from "books_ui_utils";
 
 (function () {
     const API_BASE = "/api/me/borrowed-books";
@@ -28,15 +34,7 @@ import { esc, getCookie, formatDateLabel, detailHref } from "books_ui_utils";
         return;
     }
 
-    function showError(msg) {
-        errorEl.textContent = msg;
-        errorEl.style.display = "";
-    }
-
-    function hideError() {
-        errorEl.textContent = "";
-        errorEl.style.display = "none";
-    }
+    const { showError, hideError } = bindErrorPanel(errorEl);
 
     function getLoanPageFromUrl() {
         const p = new URLSearchParams(window.location.search).get("loanPage");

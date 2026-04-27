@@ -1,4 +1,4 @@
-import { esc, detailHref } from "books_ui_utils";
+import { esc, detailHref, bindErrorPanel } from "books_ui_utils";
 
 const PER_PAGE = 25;
 const API_URL = "/api/books/catalog";
@@ -220,8 +220,8 @@ async function loadCatalog(page) {
     const errEl = document.getElementById("catalog-error");
     const list = document.getElementById("catalog-list");
 
-    errEl.style.display = "none";
-    errEl.textContent = "";
+    const { showError, hideError } = bindErrorPanel(errEl);
+    hideError();
     loading.style.display = "block";
     list.innerHTML = "";
 
@@ -232,8 +232,7 @@ async function loadCatalog(page) {
         const data = await res.json();
 
         if (!res.ok) {
-            errEl.textContent = data.message ?? "Could not load catalog.";
-            errEl.style.display = "block";
+            showError(data.message ?? "Could not load catalog.");
             loading.style.display = "none";
             document.getElementById("catalog-pagination").innerHTML = "";
             return;
@@ -243,8 +242,7 @@ async function loadCatalog(page) {
         renderPagination(data.page, data.lastPage);
         loading.style.display = "none";
     } catch {
-        errEl.textContent = "Network error. Please try again.";
-        errEl.style.display = "block";
+        showError("Network error. Please try again.");
         loading.style.display = "none";
         document.getElementById("catalog-pagination").innerHTML = "";
     }

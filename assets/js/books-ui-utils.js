@@ -36,3 +36,21 @@ export function detailHref(slug) {
     }
     return "#";
 }
+
+/**
+ * Plain-text alert panel: toggles visibility via display and sets textContent (not HTML).
+ * @param {HTMLElement} el
+ * @returns {{ showError: (msg: string) => void, hideError: () => void }}
+ */
+export function bindErrorPanel(el) {
+    return {
+        showError(msg) {
+            el.textContent = msg;
+            el.style.display = "";
+        },
+        hideError() {
+            el.textContent = "";
+            el.style.display = "none";
+        },
+    };
+}

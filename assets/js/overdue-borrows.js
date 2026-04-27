@@ -1,4 +1,9 @@
-import { esc, formatDateLabel, detailHref } from "books_ui_utils";
+import {
+    esc,
+    formatDateLabel,
+    detailHref,
+    bindErrorPanel,
+} from "books_ui_utils";
 
 (function () {
     const API_URL = "/api/admin/overdue-borrows";
@@ -13,6 +18,8 @@ import { esc, formatDateLabel, detailHref } from "books_ui_utils";
     if (!loadingEl || !errorEl || !listEl || !paginationEl) {
         return;
     }
+
+    const { showError, hideError } = bindErrorPanel(errorEl);
 
     function getPageFromUrl() {
         const p = new URLSearchParams(window.location.search).get("page");
@@ -143,16 +150,6 @@ import { esc, formatDateLabel, detailHref } from "books_ui_utils";
             </div>
         </div>
     `;
-    }
-
-    function showError(msg) {
-        errorEl.textContent = msg;
-        errorEl.style.display = "";
-    }
-
-    function hideError() {
-        errorEl.textContent = "";
-        errorEl.style.display = "none";
     }
 
     async function load(page) {
