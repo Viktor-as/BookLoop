@@ -7,6 +7,7 @@ use App\Form\Admin\CategoryFormType;
 use App\Repository\BookCategoryRepository;
 use App\Repository\CategoriesRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,14 +25,32 @@ final class AdminCategoryController extends AbstractController
     ) {}
 
     #[Route('', name: 'admin_categories_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $categories = $this->categoriesRepository->findBy(
-            [],
-            ['updatedAt' => 'DESC', 'name' => 'ASC'],
-        );
+        $page    = max(1, $request->query->getInt('page', 1));
+        $perPage = 10;
 
-        return $this->render('admin/categories/index.html.twig', ['categories' => $categories]);
+        $qb = $this->categoriesRepository->createQueryBuilder('c')
+            ->orderBy('c.updatedAt', 'DESC')
+            ->addOrderBy('c.name', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        $paginator   = new Paginator($qb);
+        $totalItems  = $paginator->count();
+        $maxPage     = max(1, (int) ceil($totalItems / $perPage));
+        if ($page > $maxPage) {
+            return $this->redirectToRoute('admin_categories_index', ['page' => $maxPage]);
+        }
+
+        $categories = iterator_to_array($paginator);
+
+        return $this->render('admin/categories/index.html.twig', [
+            'categories' => $categories,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'totalItems' => $totalItems,
+        ]);
     }
 
     #[Route('/new', name: 'admin_categories_new', methods: ['GET', 'POST'])]

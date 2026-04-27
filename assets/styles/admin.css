@@ -461,3 +461,9 @@
     float: none;
     accent-color: #4f46e5;
 }
+
+/* List pagination uses shared `.catalog-pagination*` styles from catalog.css (linked in admin layout). */
+.admin-table-wrap .catalog-pagination {
+    margin-top: 1rem;
+    padding: 1.2rem 1.35rem 1.35rem;
+}

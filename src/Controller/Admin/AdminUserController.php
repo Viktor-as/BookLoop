@@ -10,6 +10,7 @@ use App\Form\Admin\UserAdminFormType;
 use App\Repository\BorrowsRepository;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,14 +30,32 @@ final class AdminUserController extends AbstractController
     ) {}
 
     #[Route('', name: 'admin_users_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $users = $this->usersRepository->findBy(
-            [],
-            ['updatedAt' => 'DESC', 'email' => 'ASC'],
-        );
+        $page    = max(1, $request->query->getInt('page', 1));
+        $perPage = 10;
 
-        return $this->render('admin/users/index.html.twig', ['users' => $users]);
+        $qb = $this->usersRepository->createQueryBuilder('u')
+            ->orderBy('u.updatedAt', 'DESC')
+            ->addOrderBy('u.email', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        $paginator   = new Paginator($qb);
+        $totalItems  = $paginator->count();
+        $maxPage     = max(1, (int) ceil($totalItems / $perPage));
+        if ($page > $maxPage) {
+            return $this->redirectToRoute('admin_users_index', ['page' => $maxPage]);
+        }
+
+        $users = iterator_to_array($paginator);
+
+        return $this->render('admin/users/index.html.twig', [
+            'users'      => $users,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'totalItems' => $totalItems,
+        ]);
     }
 
     #[Route('/new', name: 'admin_users_new', methods: ['GET', 'POST'])]

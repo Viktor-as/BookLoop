@@ -12,6 +12,7 @@ use App\Repository\BookCategoryRepository;
 use App\Repository\BooksRepository;
 use App\Repository\BorrowsRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,14 +32,32 @@ final class AdminBookController extends AbstractController
     ) {}
 
     #[Route('', name: 'admin_books_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $books = $this->booksRepository->findBy(
-            [],
-            ['updatedAt' => 'DESC', 'title' => 'ASC'],
-        );
+        $page    = max(1, $request->query->getInt('page', 1));
+        $perPage = 10;
 
-        return $this->render('admin/books/index.html.twig', ['books' => $books]);
+        $qb = $this->booksRepository->createQueryBuilder('b')
+            ->orderBy('b.updatedAt', 'DESC')
+            ->addOrderBy('b.title', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        $paginator   = new Paginator($qb);
+        $totalItems  = $paginator->count();
+        $maxPage     = max(1, (int) ceil($totalItems / $perPage));
+        if ($page > $maxPage) {
+            return $this->redirectToRoute('admin_books_index', ['page' => $maxPage]);
+        }
+
+        $books = iterator_to_array($paginator);
+
+        return $this->render('admin/books/index.html.twig', [
+            'books'      => $books,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'totalItems' => $totalItems,
+        ]);
     }
 
     #[Route('/new', name: 'admin_books_new', methods: ['GET', 'POST'])]

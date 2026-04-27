@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Api\ApiProblem;
 use App\Api\BorrowingItemJson;
 use App\Repository\BorrowsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,9 @@ final class MyBorrowedBooksController extends AbstractController
 {
     use ApiControllerTrait;
 
+    private const BORROWED_LIST_PER_PAGE_DEFAULT = 5;
+    private const BORROWED_LIST_PER_PAGE_MAX     = 5;
+
     public function __construct(private readonly BorrowsRepository $borrowsRepository) {}
 
     #[Route('/api/me/borrowed-books', name: 'api_me_borrowed_books', methods: ['GET'])]
@@ -24,23 +28,33 @@ final class MyBorrowedBooksController extends AbstractController
             return $user;
         }
 
-        $page    = (int) $request->query->get('page', '1');
-        $perPage = (int) $request->query->get('perPage', '20');
+        $scope = (string) $request->query->get('scope', '');
+        if ($scope !== 'active' && $scope !== 'history') {
+            return $this->jsonProblem(new ApiProblem(
+                status: Response::HTTP_UNPROCESSABLE_ENTITY,
+                code: 'invalid_query',
+                title: 'Invalid query',
+                detail: 'Query parameter "scope" is required and must be "active" or "history".',
+            ));
+        }
+
+        $page = (int) $request->query->get('page', '1');
         if ($page < 1) {
             $page = 1;
         }
+
+        $perPage = (int) $request->query->get('perPage', (string) self::BORROWED_LIST_PER_PAGE_DEFAULT);
         if ($perPage < 1) {
             $perPage = 1;
         }
-        if ($perPage > 100) {
-            $perPage = 100;
+        if ($perPage > self::BORROWED_LIST_PER_PAGE_MAX) {
+            $perPage = self::BORROWED_LIST_PER_PAGE_MAX;
         }
 
-        $data = $this->borrowsRepository->findBorrowHistoryCatalogPageForMember(
-            (int) $user->getId(),
-            $page,
-            $perPage,
-        );
+        $memberId = (int) $user->getId();
+        $data     = $scope === 'active'
+            ? $this->borrowsRepository->findActiveBorrowHistoryCatalogPageForMember($memberId, $page, $perPage)
+            : $this->borrowsRepository->findPastBorrowHistoryCatalogPageForMember($memberId, $page, $perPage);
 
         $items = array_map(
             static fn (array $row) => BorrowingItemJson::encodeItem($row),

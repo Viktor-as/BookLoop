@@ -37,5 +37,11 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% include 'admin/_pagination.html.twig' with {
+            route: 'admin_categories_index',
+            page: page,
+            perPage: perPage,
+            total: totalItems
+        } only %}
     </div>
 {% endblock %}

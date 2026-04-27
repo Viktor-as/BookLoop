@@ -7,6 +7,7 @@ use App\Form\Admin\AuthorFormType;
 use App\Repository\AuthorBookRepository;
 use App\Repository\AuthorsRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,14 +25,33 @@ final class AdminAuthorController extends AbstractController
     ) {}
 
     #[Route('', name: 'admin_authors_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $authors = $this->authorsRepository->findBy(
-            [],
-            ['updatedAt' => 'DESC', 'lastName' => 'ASC', 'firstName' => 'ASC'],
-        );
+        $page    = max(1, $request->query->getInt('page', 1));
+        $perPage = 10;
 
-        return $this->render('admin/authors/index.html.twig', ['authors' => $authors]);
+        $qb = $this->authorsRepository->createQueryBuilder('a')
+            ->orderBy('a.updatedAt', 'DESC')
+            ->addOrderBy('a.lastName', 'ASC')
+            ->addOrderBy('a.firstName', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        $paginator   = new Paginator($qb);
+        $totalItems  = $paginator->count();
+        $maxPage     = max(1, (int) ceil($totalItems / $perPage));
+        if ($page > $maxPage) {
+            return $this->redirectToRoute('admin_authors_index', ['page' => $maxPage]);
+        }
+
+        $authors = iterator_to_array($paginator);
+
+        return $this->render('admin/authors/index.html.twig', [
+            'authors'    => $authors,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'totalItems' => $totalItems,
+        ]);
     }
 
     #[Route('/new', name: 'admin_authors_new', methods: ['GET', 'POST'])]

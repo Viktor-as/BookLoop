@@ -121,6 +121,120 @@ class BorrowsRepository extends ServiceEntityRepository
             br.returned_at DESC
         SQL;
 
+    private const BORROW_HISTORY_ORDER_ACTIVE = <<<'SQL'
+        ORDER BY br.due_date ASC, br.borrowed_at ASC
+        SQL;
+
+    private const BORROW_HISTORY_ORDER_HISTORY = <<<'SQL'
+        ORDER BY br.returned_at DESC, br.borrowed_at DESC
+        SQL;
+
+    public function countActiveBorrowHistoryForMember(int $memberId): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT COUNT(*) FROM borrows br WHERE br.member_id = :memberId AND br.returned_at IS NULL';
+
+        return (int) $conn->fetchOne($sql, ['memberId' => $memberId], ['memberId' => ParameterType::INTEGER]);
+    }
+
+    public function countPastBorrowHistoryForMember(int $memberId): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT COUNT(*) FROM borrows br WHERE br.member_id = :memberId AND br.returned_at IS NOT NULL';
+
+        return (int) $conn->fetchOne($sql, ['memberId' => $memberId], ['memberId' => ParameterType::INTEGER]);
+    }
+
+    /**
+     * @return array{items: list<array<string, mixed>>, total: int}
+     */
+    public function findActiveBorrowHistoryCatalogPageForMember(int $memberId, int $page, int $perPage): array
+    {
+        $page    = max(1, $page);
+        $perPage = min(100, max(1, $perPage));
+        $offset  = ($page - 1) * $perPage;
+
+        $total = $this->countActiveBorrowHistoryForMember($memberId);
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = self::BORROW_HISTORY_CATALOG_BASE_SQL
+            .' WHERE br.member_id = :memberId AND br.returned_at IS NULL'
+            .' GROUP BY br.id, br.borrowed_at, br.due_date, br.returned_at, b.id, b.slug, b.title'
+            .' '.self::BORROW_HISTORY_ORDER_ACTIVE
+            .' LIMIT :limit OFFSET :offset';
+
+        $rows = $conn->fetchAllAssociative(
+            $sql,
+            [
+                'memberId' => $memberId,
+                'limit'    => $perPage,
+                'offset'   => $offset,
+            ],
+            [
+                'memberId' => ParameterType::INTEGER,
+                'limit'    => ParameterType::INTEGER,
+                'offset'   => ParameterType::INTEGER,
+            ],
+        );
+
+        $items = array_map(
+            fn (array $r): array => $this->mapBorrowHistoryRowToItem($r),
+            $rows,
+        );
+
+        return [
+            'items' => $items,
+            'total' => $total,
+        ];
+    }
+
+    /**
+     * @return array{items: list<array<string, mixed>>, total: int}
+     */
+    public function findPastBorrowHistoryCatalogPageForMember(int $memberId, int $page, int $perPage): array
+    {
+        $page    = max(1, $page);
+        $perPage = min(100, max(1, $perPage));
+        $offset  = ($page - 1) * $perPage;
+
+        $total = $this->countPastBorrowHistoryForMember($memberId);
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = self::BORROW_HISTORY_CATALOG_BASE_SQL
+            .' WHERE br.member_id = :memberId AND br.returned_at IS NOT NULL'
+            .' GROUP BY br.id, br.borrowed_at, br.due_date, br.returned_at, b.id, b.slug, b.title'
+            .' '.self::BORROW_HISTORY_ORDER_HISTORY
+            .' LIMIT :limit OFFSET :offset';
+
+        $rows = $conn->fetchAllAssociative(
+            $sql,
+            [
+                'memberId' => $memberId,
+                'limit'    => $perPage,
+                'offset'   => $offset,
+            ],
+            [
+                'memberId' => ParameterType::INTEGER,
+                'limit'    => ParameterType::INTEGER,
+                'offset'   => ParameterType::INTEGER,
+            ],
+        );
+
+        $items = array_map(
+            fn (array $r): array => $this->mapBorrowHistoryRowToItem($r),
+            $rows,
+        );
+
+        return [
+            'items' => $items,
+            'total' => $total,
+        ];
+    }
+
     public function countBorrowHistoryForMember(int $memberId): int
     {
         $conn = $this->getEntityManager()->getConnection();

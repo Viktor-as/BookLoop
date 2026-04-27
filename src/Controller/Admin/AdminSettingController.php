@@ -7,6 +7,7 @@ use App\Entity\Users;
 use App\Form\Admin\SettingFormType;
 use App\Repository\SettingsRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,14 +24,32 @@ final class AdminSettingController extends AbstractController
     ) {}
 
     #[Route('', name: 'admin_settings_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $settings = $this->settingsRepository->findBy(
-            [],
-            ['updatedAt' => 'DESC', 'key' => 'ASC'],
-        );
+        $page    = max(1, $request->query->getInt('page', 1));
+        $perPage = 10;
 
-        return $this->render('admin/settings/index.html.twig', ['settings' => $settings]);
+        $qb = $this->settingsRepository->createQueryBuilder('s')
+            ->orderBy('s.updatedAt', 'DESC')
+            ->addOrderBy('s.key', 'ASC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        $paginator   = new Paginator($qb);
+        $totalItems  = $paginator->count();
+        $maxPage     = max(1, (int) ceil($totalItems / $perPage));
+        if ($page > $maxPage) {
+            return $this->redirectToRoute('admin_settings_index', ['page' => $maxPage]);
+        }
+
+        $settings = iterator_to_array($paginator);
+
+        return $this->render('admin/settings/index.html.twig', [
+            'settings'   => $settings,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'totalItems' => $totalItems,
+        ]);
     }
 
     #[Route('/new', name: 'admin_settings_new', methods: ['GET', 'POST'])]

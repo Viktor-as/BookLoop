@@ -1,0 +1,60 @@
+{# Expects: route (string), page (int), perPage (int), total (int) — markup matches catalog / borrowed pager (catalog.css). #}
+{% set total = total|default(0) %}
+{% set per_page = perPage|default(10) %}
+{% set current = page|default(1) %}
+{% set total_pages = total > 0 ? (total / per_page)|round(0, 'ceil') : 1 %}
+{% if total_pages < 1 %}
+    {% set total_pages = 1 %}
+{% endif %}
+
+{% if total > 0 %}
+    {% set from = (current - 1) * per_page + 1 %}
+    {% set to = min(current * per_page, total) %}
+    {% set window_size = 5 %}
+    {% set half = (window_size / 2)|round(0, 'floor') %}
+    {% set start_page = max(1, current - half) %}
+    {% set end_page = min(total_pages, start_page + window_size - 1) %}
+    {% set start_page = max(1, end_page - window_size + 1) %}
+
+    <div class="catalog-pagination" role="navigation" aria-label="List pagination">
+        <div class="catalog-pagination-bar">
+            <span class="catalog-pagination-summary">Showing {{ from }}–{{ to }} of {{ total }}{% if total_pages > 1 %} · Page {{ current }} of {{ total_pages }}{% endif %}</span>
+
+            {% if total_pages > 1 %}
+                <div class="catalog-pagination-controls">
+                    {% if current > 1 %}
+                        <a href="{{ path(route, {page: current - 1}) }}" class="catalog-pagination-edge" rel="prev">Prev</a>
+                    {% endif %}
+
+                    <div class="catalog-pagination-pages">
+                        {% if start_page > 1 %}
+                            <a href="{{ path(route, {page: 1}) }}" class="catalog-pagination-num">1</a>
+                            {% if start_page > 2 %}
+                                <span class="catalog-pagination-ellipsis" aria-hidden="true">…</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% for p in start_page..end_page %}
+                            {% if p == current %}
+                                <em class="catalog-pagination-current">{{ p }}</em>
+                            {% else %}
+                                <a href="{{ path(route, {page: p}) }}" class="catalog-pagination-num">{{ p }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if end_page < total_pages %}
+                            {% if end_page < total_pages - 1 %}
+                                <span class="catalog-pagination-ellipsis" aria-hidden="true">…</span>
+                            {% endif %}
+                            <a href="{{ path(route, {page: total_pages}) }}" class="catalog-pagination-num">{{ total_pages }}</a>
+                        {% endif %}
+                    </div>
+
+                    {% if current < total_pages %}
+                        <a href="{{ path(route, {page: current + 1}) }}" class="catalog-pagination-edge" rel="next">Next</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
