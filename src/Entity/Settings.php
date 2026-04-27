@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\SettingsRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SettingsRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -16,9 +17,12 @@ class Settings
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(name: 'setting_key', length: 100, unique: true)]
     private ?string $key = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: 'text')]
     private ?string $value = null;
 

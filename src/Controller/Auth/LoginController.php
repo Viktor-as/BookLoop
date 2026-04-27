@@ -3,8 +3,8 @@
 namespace App\Controller\Auth;
 
 use App\Entity\Users;
+use App\Repository\UsersRepository;
 use App\Service\AuthCookieService;
-use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,22 +15,22 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class RegistrationController extends AbstractController
+final class LoginController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface      $em,
+        private readonly UsersRepository             $usersRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly JWTTokenManagerInterface    $jwtManager,
         private readonly ValidatorInterface          $validator,
         private readonly AuthCookieService           $cookieService,
     ) {}
 
-    #[Route('/api/auth/register', name: 'api_auth_register', methods: ['POST'])]
-    public function register(Request $request): JsonResponse
+    #[Route('/api/auth/login', name: 'api_auth_login', methods: ['POST'])]
+    public function login(Request $request): JsonResponse
     {
         $content = (string) $request->getContent();
         if ($content === '') {
-            return $this->json(['message' => 'Request body is empty. Send JSON with firstName, lastName, email, and password.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Request body is empty. Send JSON with email and password.'], Response::HTTP_BAD_REQUEST);
         }
 
         try {
@@ -45,15 +45,13 @@ class RegistrationController extends AbstractController
 
         $violations = $this->validator->validate($data, new Assert\Collection(
             fields: [
-                'firstName' => [new Assert\NotBlank(), new Assert\Length(max: 100)],
-                'lastName'  => [new Assert\NotBlank(), new Assert\Length(max: 100)],
-                'email'     => [new Assert\NotBlank(), new Assert\Email(), new Assert\Length(max: 180)],
-                'password'  => [new Assert\NotBlank(), new Assert\Length(min: 8)],
+                'email'    => [new Assert\NotBlank(), new Assert\Email(), new Assert\Length(max: 180)],
+                'password' => [new Assert\NotBlank()],
             ],
             allowExtraFields: false,
         ));
 
-        if (count($violations) > 0) {
+        if (\count($violations) > 0) {
             $errors = [];
             foreach ($violations as $violation) {
                 $errors[$violation->getPropertyPath()] = $violation->getMessage();
@@ -61,27 +59,21 @@ class RegistrationController extends AbstractController
 
             return $this->json(
                 ['message' => 'Validation failed.', 'errors' => $errors],
-                Response::HTTP_UNPROCESSABLE_ENTITY
+                Response::HTTP_UNPROCESSABLE_ENTITY,
             );
         }
 
-        $existing = $this->em->getRepository(Users::class)->findOneBy(['email' => $data['email']]);
-        if ($existing) {
-            return $this->json(['message' => 'Email is already registered.'], Response::HTTP_CONFLICT);
+        $email = $data['email'];
+        $plain = $data['password'];
+
+        $user = $this->usersRepository->findOneBy(['email' => $email]);
+        if (!$user instanceof Users || !$this->passwordHasher->isPasswordValid($user, $plain)) {
+            return $this->json(['message' => 'Invalid credentials.'], Response::HTTP_UNAUTHORIZED);
         }
-
-        $user = new Users();
-        $user->setFirstName($data['firstName']);
-        $user->setLastName($data['lastName']);
-        $user->setEmail($data['email']);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
-
-        $this->em->persist($user);
-        $this->em->flush();
 
         $token    = $this->jwtManager->create($user);
         $response = $this->json([
-            'message' => 'Registration successful.',
+            'message' => 'Login successful.',
             'user'    => [
                 'id'        => $user->getId(),
                 'firstName' => $user->getFirstName(),
@@ -89,7 +81,7 @@ class RegistrationController extends AbstractController
                 'email'     => $user->getEmail(),
                 'role'      => $user->getRole(),
             ],
-        ], Response::HTTP_CREATED);
+        ], Response::HTTP_OK);
 
         $response->headers->setCookie($this->cookieService->createJwtCookie($token));
         $response->headers->setCookie($this->cookieService->createCsrfCookie());

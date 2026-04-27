@@ -2,6 +2,8 @@ framework:
     validation:
         # Enables validator auto-mapping support.
         # For instance, basic validation constraints will be inferred from Doctrine's metadata.
+        # Left disabled: mapping all App\Entity would infer NotBlank on Users.password and break
+        # admin user creation (hashed password is set only after the form validates).
         #auto_mapping:
         #    App\Entity\: []
 

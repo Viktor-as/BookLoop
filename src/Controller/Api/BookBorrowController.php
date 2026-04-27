@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class BookBorrowController extends AbstractController
@@ -40,6 +41,19 @@ final class BookBorrowController extends AbstractController
         $data = $this->decodeRequestJson($request);
         if ($data instanceof JsonResponse) {
             return $data;
+        }
+
+        $payloadErrors = $this->validator->validate($data, new Assert\Collection(
+            fields: [
+                'days' => [
+                    new Assert\NotNull(message: 'Field "days" is required.'),
+                    new Assert\Positive(message: 'Field "days" must be a positive number.'),
+                ],
+            ],
+            allowExtraFields: false,
+        ));
+        if ($payloadErrors->count() > 0) {
+            return $this->jsonProblem($this->apiProblemFromViolations($payloadErrors));
         }
 
         $input   = $this->buildBorrowRequestFromData($data);

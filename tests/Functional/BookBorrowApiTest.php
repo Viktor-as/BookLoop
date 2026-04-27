@@ -117,6 +117,34 @@ final class BookBorrowApiTest extends ApiWebTestCase
         );
     }
 
+    public function testExtraJsonFieldReturns422ValidationError(): void
+    {
+        $suffix = bin2hex(random_bytes(4));
+        $plain = 'FunctionalBorrow123';
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $member = TestEntityFactory::persistMember($em, $hasher, $suffix, $plain);
+        $book = TestEntityFactory::persistBook($em, $suffix, 14);
+
+        $this->loginAs($member->getEmail(), $plain);
+        $this->client->request(
+            'POST',
+            '/api/books/' . $book->getSlug() . '/borrow',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            '{"days": 7, "foo": 1}',
+        );
+
+        $data = JsonTestAssertions::assertJsonProblem(
+            $this->client->getResponse(),
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'validation_error',
+        );
+        self::assertArrayHasKey('violations', $data);
+        self::assertNotSame([], $data['violations']);
+    }
+
     public function testOnLoanReturns409(): void
     {
         $suffix = bin2hex(random_bytes(4));

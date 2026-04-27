@@ -34,14 +34,29 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             }),
         });
 
+        const data = await res.json();
+
         if (res.ok) {
             window.location.href = '/';
             return;
         }
 
-        const data = await res.json();
+        if (res.status === 422 && data.errors) {
+            const fieldMap = {
+                '[email]':    'email',
+                '[password]': 'password',
+            };
 
-        if (res.status === 401) {
+            Object.entries(data.errors).forEach(([key, msg]) => {
+                const name = fieldMap[key] ?? null;
+                if (name) {
+                    const input = form[name];
+                    const errEl = document.getElementById('err-' + name);
+                    input.classList.add('is-invalid');
+                    if (errEl) errEl.textContent = msg;
+                }
+            });
+        } else if (res.status === 401) {
             const emailInput    = form.email;
             const passwordInput = form.password;
             emailInput.classList.add('is-invalid');

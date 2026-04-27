@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\AuthorsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AuthorsRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -14,9 +15,13 @@ class Authors
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100)]
     private ?string $firstName = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100)]
     private ?string $lastName = null;
 
