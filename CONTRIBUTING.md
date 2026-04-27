@@ -30,12 +30,8 @@ PHPUnit is configured in `phpunit.dist.xml` with the **test** environment (`APP_
    vendor/bin/phpunit --testsuite Smoke
    ```
 
-The **Unit** suite does not use the database or HTTP kernel and is suitable for CI when no MySQL instance is available.
+The **Unit** suite does not use the database or HTTP kernel and is the fastest to run locally when you do not have a test database configured.
 
 ### JWT cookies in tests
 
 BrowserKit uses `http://localhost`. Test env enables **non-secure** JWT cookies via `config/packages/test/lexik_jwt_authentication.yaml` so the `BEARER` cookie is sent after `POST /api/auth/login`.
-
-## CI
-
-The GitHub Actions workflow runs the **Unit** testsuite on push and pull request. Full layers require secrets or a job-level `DATABASE_URL` and migrations.
