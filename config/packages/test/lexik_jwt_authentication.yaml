@@ -1,0 +1,10 @@
+# BrowserKit uses http://localhost — secure cookies would not be sent.
+lexik_jwt_authentication:
+    set_cookies:
+        BEARER:
+            samesite: lax
+            httpOnly: true
+            secure: false
+            path: /
+            domain: null
+            split: []

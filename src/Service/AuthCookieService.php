@@ -10,13 +10,17 @@ class AuthCookieService
     public const CSRF_COOKIE_NAME = 'XSRF-TOKEN';
     public const TOKEN_TTL        = 3600;
 
+    public function __construct(
+        private readonly bool $useSecureCookies = true,
+    ) {}
+
     public function createJwtCookie(string $token): Cookie
     {
         return Cookie::create(self::JWT_COOKIE_NAME)
             ->withValue($token)
             ->withExpires(time() + self::TOKEN_TTL)
             ->withPath('/')
-            ->withSecure(true)
+            ->withSecure($this->useSecureCookies)
             ->withHttpOnly(true)
             ->withSameSite(Cookie::SAMESITE_STRICT);
     }
@@ -29,7 +33,7 @@ class AuthCookieService
             ->withValue($csrfToken)
             ->withExpires(time() + self::TOKEN_TTL)
             ->withPath('/')
-            ->withSecure(true)
+            ->withSecure($this->useSecureCookies)
             ->withHttpOnly(false)
             ->withSameSite(Cookie::SAMESITE_STRICT);
     }
@@ -40,7 +44,7 @@ class AuthCookieService
             ->withValue('')
             ->withExpires(1)
             ->withPath('/')
-            ->withSecure(true)
+            ->withSecure($this->useSecureCookies)
             ->withHttpOnly(true)
             ->withSameSite(Cookie::SAMESITE_STRICT);
     }
@@ -51,7 +55,7 @@ class AuthCookieService
             ->withValue('')
             ->withExpires(1)
             ->withPath('/')
-            ->withSecure(true)
+            ->withSecure($this->useSecureCookies)
             ->withHttpOnly(false)
             ->withSameSite(Cookie::SAMESITE_STRICT);
     }
