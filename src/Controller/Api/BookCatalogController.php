@@ -2,7 +2,10 @@
 
 namespace App\Controller\Api;
 
+use App\Api\ApiProblem;
 use App\Dto\CatalogFilters;
+use App\Dto\Response\CatalogItemResponse;
+use App\Dto\Response\CatalogPageResponse;
 use App\Entity\Users;
 use App\Repository\BooksRepository;
 use App\Repository\BorrowsRepository;
@@ -15,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class BookCatalogController extends AbstractController
 {
+    use ApiControllerTrait;
+
     private const DEFAULT_PER_PAGE = 25;
 
     private const MAX_PER_PAGE = 100;
@@ -32,11 +37,21 @@ final class BookCatalogController extends AbstractController
         $perPageRaw = $request->query->get('perPage', (string) self::DEFAULT_PER_PAGE);
 
         if (!is_numeric($pageRaw) || (int) $pageRaw < 1) {
-            return $this->json(['message' => 'Invalid page. Must be a positive integer.'], Response::HTTP_BAD_REQUEST);
+            return $this->jsonProblem(new ApiProblem(
+                status: Response::HTTP_BAD_REQUEST,
+                code: 'invalid_query',
+                title: 'Invalid query',
+                detail: 'Query parameter "page" must be a positive integer.',
+            ));
         }
 
         if (!is_numeric($perPageRaw) || (int) $perPageRaw < 1) {
-            return $this->json(['message' => 'Invalid perPage. Must be a positive integer.'], Response::HTTP_BAD_REQUEST);
+            return $this->jsonProblem(new ApiProblem(
+                status: Response::HTTP_BAD_REQUEST,
+                code: 'invalid_query',
+                title: 'Invalid query',
+                detail: 'Query parameter "perPage" must be a positive integer.',
+            ));
         }
 
         $page    = (int) $pageRaw;
@@ -56,18 +71,26 @@ final class BookCatalogController extends AbstractController
         $lastPage = (int) max(1, (int) ceil($total / $perPage));
 
         if ($page > $lastPage) {
-            return $this->json([
-                'message' => sprintf('Page %d is out of range. Last page is %d.', $page, $lastPage),
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->jsonProblem(new ApiProblem(
+                status: Response::HTTP_BAD_REQUEST,
+                code: 'invalid_query',
+                title: 'Invalid query',
+                detail: sprintf('Page %d is out of range. Last page is %d.', $page, $lastPage),
+            ));
         }
 
-        return $this->json([
-            'page'     => $page,
-            'perPage'  => $perPage,
-            'total'    => $total,
-            'lastPage' => $lastPage,
-            'items'    => $items,
-        ]);
+        $payload = new CatalogPageResponse(
+            page: $page,
+            perPage: $perPage,
+            total: $total,
+            lastPage: $lastPage,
+            items: array_map(
+                static fn (array $row): CatalogItemResponse => CatalogItemResponse::fromRow($row),
+                $items,
+            ),
+        );
+
+        return $this->json($payload);
     }
 
     private function buildCatalogFilters(Request $request): CatalogFilters|JsonResponse
@@ -82,17 +105,21 @@ final class BookCatalogController extends AbstractController
         $categoryId    = null;
         if ($categoryIdRaw !== null && $categoryIdRaw !== '') {
             if (!is_numeric($categoryIdRaw) || (int) $categoryIdRaw < 1) {
-                return $this->json(
-                    ['message' => 'Invalid categoryId. Must be a positive integer.'],
-                    Response::HTTP_BAD_REQUEST,
-                );
+                return $this->jsonProblem(new ApiProblem(
+                    status: Response::HTTP_BAD_REQUEST,
+                    code: 'invalid_query',
+                    title: 'Invalid query',
+                    detail: 'Query parameter "categoryId" must be a positive integer.',
+                ));
             }
             $cid = (int) $categoryIdRaw;
             if ($this->categoriesRepository->find($cid) === null) {
-                return $this->json(
-                    ['message' => sprintf('Category %d does not exist.', $cid)],
-                    Response::HTTP_BAD_REQUEST,
-                );
+                return $this->jsonProblem(new ApiProblem(
+                    status: Response::HTTP_BAD_REQUEST,
+                    code: 'invalid_query',
+                    title: 'Invalid query',
+                    detail: sprintf('Category %d does not exist.', $cid),
+                ));
             }
             $categoryId = $cid;
         }

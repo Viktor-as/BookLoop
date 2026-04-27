@@ -45,8 +45,5 @@
         </button>
     </form>
 </div>
-{% endblock %}
-
-{% block javascripts %}
-    <script src="{{ asset('js/login.js') }}"></script>
+    {# login.js is loaded as an ES module via import() from assets/app.js (see base importmap) #}
 {% endblock %}

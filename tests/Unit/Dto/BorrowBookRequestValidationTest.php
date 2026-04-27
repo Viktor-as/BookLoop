@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Dto;
 
-use App\Dto\BorrowBookRequest;
+use App\Dto\Request\BorrowBookRequest;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
 
@@ -27,16 +27,14 @@ final class BorrowBookRequestValidationTest extends TestCase
 
     public function testDaysMustBePositiveInteger(): void
     {
-        $input = new BorrowBookRequest();
-        $input->days = 0;
+        $input = new BorrowBookRequest(days: 0);
         $violations = $this->validator()->validate($input);
         self::assertGreaterThan(0, $violations->count());
     }
 
     public function testValidDaysPasses(): void
     {
-        $input = new BorrowBookRequest();
-        $input->days = 7;
+        $input = new BorrowBookRequest(days: 7);
         $violations = $this->validator()->validate($input);
         self::assertCount(0, $violations);
     }

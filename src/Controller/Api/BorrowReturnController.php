@@ -3,7 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Api\ApiProblem;
-use App\Api\BorrowingItemJson;
+use App\Dto\Response\BorrowingItemResponse;
+use App\Dto\Response\BorrowReturnSuccessResponse;
 use App\Dto\ReturnBookResult;
 use App\Repository\BorrowsRepository;
 use App\Service\ReturnBookService;
@@ -44,10 +45,10 @@ final class BorrowReturnController extends AbstractController
             (int) $user->getId(),
         );
 
-        $payload = [
-            'message' => $result->message,
-            'item'    => $row ? BorrowingItemJson::encodeItem($row) : null,
-        ];
+        $payload = new BorrowReturnSuccessResponse(
+            message: $result->message,
+            item: $row !== null ? BorrowingItemResponse::fromRow($row) : null,
+        );
 
         return $this->json($payload, Response::HTTP_OK, [
             'Content-Type' => 'application/json; charset=UTF-8',

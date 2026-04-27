@@ -3,7 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Api\ApiProblem;
-use App\Api\BorrowingItemJson;
+use App\Dto\Response\BorrowingItemResponse;
 use App\Repository\BorrowsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -44,6 +44,6 @@ final class BorrowingDetailController extends AbstractController
             ));
         }
 
-        return $this->json(BorrowingItemJson::encodeItem($row));
+        return $this->json(BorrowingItemResponse::fromRow($row));
     }
 }

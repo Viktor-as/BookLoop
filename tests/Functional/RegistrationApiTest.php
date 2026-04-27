@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class RegistrationApiTest extends ApiWebTestCase
 {
-    public function testEmptyJsonObjectReturns422ValidationFailed(): void
+    public function testEmptyJsonObjectSurfacesViolationsOnAllFields(): void
     {
         $this->client->request(
             'POST',
@@ -21,15 +21,39 @@ final class RegistrationApiTest extends ApiWebTestCase
             '{}',
         );
 
-        $response = $this->client->getResponse();
-        self::assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
-        $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
-        self::assertSame('Validation failed.', $data['message']);
-        self::assertIsArray($data['errors']);
-        self::assertNotSame([], $data['errors']);
+        JsonTestAssertions::assertJsonProblemHasViolationsOnFields(
+            $this->client->getResponse(),
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'validation_error',
+            ['firstName', 'lastName', 'email', 'password'],
+        );
     }
 
-    public function testExtraFieldReturns422ValidationFailed(): void
+    public function testEmptyStringPayloadSurfacesViolationsOnAllFields(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/auth/register',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'firstName' => '',
+                'lastName'  => '',
+                'email'     => '',
+                'password'  => '',
+            ], \JSON_THROW_ON_ERROR),
+        );
+
+        JsonTestAssertions::assertJsonProblemHasViolationsOnFields(
+            $this->client->getResponse(),
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'validation_error',
+            ['firstName', 'lastName', 'email', 'password'],
+        );
+    }
+
+    public function testExtraFieldReturns422ValidationProblem(): void
     {
         $suffix = bin2hex(random_bytes(4));
         $payload = [
@@ -49,14 +73,16 @@ final class RegistrationApiTest extends ApiWebTestCase
             json_encode($payload, \JSON_THROW_ON_ERROR),
         );
 
-        $response = $this->client->getResponse();
-        self::assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
-        $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
-        self::assertSame('Validation failed.', $data['message']);
-        self::assertIsArray($data['errors']);
+        $data = JsonTestAssertions::assertJsonProblem(
+            $this->client->getResponse(),
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'validation_error',
+        );
+        self::assertArrayHasKey('violations', $data);
+        self::assertNotSame([], $data['violations']);
     }
 
-    public function testInvalidJsonReturns400(): void
+    public function testInvalidJsonReturns400Problem(): void
     {
         $this->client->request(
             'POST',
@@ -67,9 +93,10 @@ final class RegistrationApiTest extends ApiWebTestCase
             '{not json',
         );
 
-        $response = $this->client->getResponse();
-        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
-        self::assertSame('Invalid JSON.', $data['message']);
+        JsonTestAssertions::assertJsonProblem(
+            $this->client->getResponse(),
+            Response::HTTP_BAD_REQUEST,
+            'invalid_json',
+        );
     }
 }

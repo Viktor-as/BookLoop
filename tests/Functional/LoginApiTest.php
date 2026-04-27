@@ -13,7 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class LoginApiTest extends ApiWebTestCase
 {
-    public function testEmptyJsonObjectReturns422WithFieldErrors(): void
+    public function testEmptyJsonObjectSurfacesViolationsOnEmailAndPassword(): void
     {
         $this->client->request(
             'POST',
@@ -24,12 +24,36 @@ final class LoginApiTest extends ApiWebTestCase
             '{}',
         );
 
-        $response = $this->client->getResponse();
-        self::assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
-        $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
-        self::assertSame('Validation failed.', $data['message']);
-        self::assertIsArray($data['errors']);
-        self::assertNotSame([], $data['errors']);
+        $data = JsonTestAssertions::assertJsonProblemHasViolationsOnFields(
+            $this->client->getResponse(),
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'validation_error',
+            ['email', 'password'],
+        );
+        self::assertStringContainsString('email', (string) $data['detail']);
+        self::assertStringContainsString('password', (string) $data['detail']);
+    }
+
+    /**
+     * Mirrors the auth page submit: blank inputs are sent as "" after trim.
+     */
+    public function testEmptyStringPayloadSurfacesViolationsOnEmailAndPassword(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/auth/login',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['email' => '', 'password' => ''], \JSON_THROW_ON_ERROR),
+        );
+
+        JsonTestAssertions::assertJsonProblemHasViolationsOnFields(
+            $this->client->getResponse(),
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'validation_error',
+            ['email', 'password'],
+        );
     }
 
     public function testSuccessfulLoginReturns200AndSetsCookies(): void
@@ -63,7 +87,7 @@ final class LoginApiTest extends ApiWebTestCase
         self::assertArrayHasKey('user', $data);
     }
 
-    public function testWrongPasswordReturns401(): void
+    public function testWrongPasswordReturns401InvalidCredentialsProblem(): void
     {
         $suffix = bin2hex(random_bytes(4));
         $plain = 'RightPwd123';
@@ -83,9 +107,10 @@ final class LoginApiTest extends ApiWebTestCase
             ], \JSON_THROW_ON_ERROR),
         );
 
-        $response = $this->client->getResponse();
-        self::assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
-        $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_UNAUTHORIZED);
-        self::assertSame('Invalid credentials.', $data['message']);
+        JsonTestAssertions::assertJsonProblem(
+            $this->client->getResponse(),
+            Response::HTTP_UNAUTHORIZED,
+            'invalid_credentials',
+        );
     }
 }

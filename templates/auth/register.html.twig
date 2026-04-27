@@ -58,8 +58,5 @@
         </button>
     </form>
 </div>
-{% endblock %}
-
-{% block javascripts %}
-    <script src="{{ asset('js/register.js') }}"></script>
+    {# register.js is loaded as an ES module via import() from assets/app.js #}
 {% endblock %}

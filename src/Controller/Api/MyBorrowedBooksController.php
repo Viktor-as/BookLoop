@@ -3,7 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Api\ApiProblem;
-use App\Api\BorrowingItemJson;
+use App\Dto\Response\BorrowedBooksPageResponse;
+use App\Dto\Response\BorrowingItemResponse;
 use App\Repository\BorrowsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -57,17 +58,19 @@ final class MyBorrowedBooksController extends AbstractController
             : $this->borrowsRepository->findPastBorrowHistoryCatalogPageForMember($memberId, $page, $perPage);
 
         $items = array_map(
-            static fn (array $row) => BorrowingItemJson::encodeItem($row),
+            static fn (array $row): BorrowingItemResponse => BorrowingItemResponse::fromRow($row),
             $data['items'],
         );
 
+        $payload = new BorrowedBooksPageResponse(
+            items: $items,
+            page: $page,
+            perPage: $perPage,
+            total: $data['total'],
+        );
+
         return $this->json(
-            [
-                'items'   => $items,
-                'page'    => $page,
-                'perPage' => $perPage,
-                'total'   => $data['total'],
-            ],
+            $payload,
             Response::HTTP_OK,
             ['Content-Type' => 'application/json; charset=UTF-8'],
         );

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Api\ApiProblem;
+use App\Api\ApiProblemFactory;
 use App\Entity\Users;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,20 +42,6 @@ trait ApiControllerTrait
 
     private function apiProblemFromViolations(ConstraintViolationListInterface $violations): ApiProblem
     {
-        $list = [];
-        foreach ($violations as $v) {
-            $list[] = [
-                'field' => (string) $v->getPropertyPath(),
-                'message' => $v->getMessage(),
-            ];
-        }
-
-        return new ApiProblem(
-            status: Response::HTTP_UNPROCESSABLE_ENTITY,
-            code: 'validation_error',
-            title: 'Validation failed',
-            detail: 'One or more fields are not valid.',
-            violations: $list,
-        );
+        return ApiProblemFactory::fromViolations($violations);
     }
 }

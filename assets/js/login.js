@@ -8,6 +8,65 @@ document.querySelectorAll('.toggle-password').forEach(btn => {
     });
 });
 
+function fieldFromApiViolation (v) {
+    const raw = v && (v.field != null && v.field !== '' ? v.field : v.propertyPath);
+    if (raw == null || String(raw) === '') return null;
+    let s = String(raw).trim();
+    if (s.startsWith('[') && s.endsWith(']')) s = s.slice(1, -1);
+    const dot = s.lastIndexOf('.');
+    if (dot >= 0) s = s.slice(dot + 1);
+    const b = s.indexOf('[');
+    if (b >= 0) s = s.slice(0, b);
+    return s || null;
+}
+
+/** Strip BOM, trim, avoid parsing JSON-looking HTML as success (returns null). */
+function parseJsonBody (raw) {
+    if (raw == null || String(raw) === '') return null;
+    let t = String(raw);
+    t = t.replace(/^\uFEFF/, '');
+    t = t.trim();
+    if (t === '' || t[0] === '<') {
+        return null;
+    }
+    if (t[0] !== '{' && t[0] !== '[') {
+        return null;
+    }
+    try {
+        return JSON.parse(t);
+    } catch {
+        return null;
+    }
+}
+
+function problemMessage (data) {
+    if (!data || typeof data !== 'object') {
+        return '';
+    }
+    if (data.detail) {
+        return String(data.detail);
+    }
+    if (data.title) {
+        return String(data.title);
+    }
+    if (data.message) {
+        return String(data.message);
+    }
+    return '';
+}
+
+function bannerTextForUnknownError (res, data) {
+    const m = problemMessage(data);
+    if (m) {
+        return m;
+    }
+    if (res.status) {
+        return 'The server returned an error (HTTP ' + res.status
+            + ') and the response was not a JSON error object we can read. Request failed. Try again, or use devtools Network tab to inspect the response body.';
+    }
+    return 'The request could not be completed (no HTTP status, often blocked or offline).';
+}
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -23,48 +82,83 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     document.getElementById('btn-label').style.display   = 'none';
     document.getElementById('btn-spinner').style.display = 'inline';
 
+    const fieldToInputId = {
+        email:    'email',
+        password: 'password',
+    };
+
+    const applyFieldError = (field, message) => {
+        const id  = fieldToInputId[field] ?? null;
+        if (!id) return;
+        const input = document.getElementById(id);
+        const errEl = document.getElementById('err-' + id);
+        if (input) input.classList.add('is-invalid');
+        if (errEl) errEl.textContent = message;
+    };
+
     try {
         const res = await fetch('/api/auth/login', {
             method:      'POST',
             credentials: 'include',
-            headers:     { 'Content-Type': 'application/json' },
-            body:        JSON.stringify({
-                email:    form.email.value.trim(),
-                password: form.password.value.trim(),
+            headers:     {
+                'Content-Type': 'application/json',
+                Accept:         'application/json, application/problem+json',
+            },
+            body: JSON.stringify({
+                email:    (document.getElementById('email')?.value ?? '').trim(),
+                password: (document.getElementById('password')?.value ?? '').trim(),
             }),
         });
 
-        const data = await res.json();
+        const raw  = await res.text();
+        const data = parseJsonBody(raw);
 
         if (res.ok) {
             window.location.href = '/';
             return;
         }
 
-        if (res.status === 422 && data.errors) {
-            const fieldMap = {
-                '[email]':    'email',
-                '[password]': 'password',
-            };
+        const isValidation   = (res.status === 422) || (data && data.code === 'validation_error');
+        const violations     = (data && Array.isArray(data.violations)) ? data.violations : [];
 
-            Object.entries(data.errors).forEach(([key, msg]) => {
-                const name = fieldMap[key] ?? null;
-                if (name) {
-                    const input = form[name];
-                    const errEl = document.getElementById('err-' + name);
-                    input.classList.add('is-invalid');
-                    if (errEl) errEl.textContent = msg;
+        if (isValidation) {
+            if (violations.length > 0) {
+                let mapped = 0;
+                violations.forEach((v) => {
+                    const field   = fieldFromApiViolation(v);
+                    const message = (v && v.message) ? String(v.message) : '';
+                    if (field) {
+                        applyFieldError(field, message);
+                        mapped++;
+                    }
+                });
+                if (mapped > 0) {
+                    if (data && (data.detail || data.title) && (mapped < violations.length)) {
+                        banner.textContent   = (data.detail || data.title) + '';
+                        banner.style.display = 'block';
+                    }
+                } else {
+                    banner.textContent   = (data && (data.detail || data.title)) || 'Validation failed, but the server did not return field names we understand.';
+                    banner.style.display = 'block';
                 }
-            });
+            } else {
+                banner.textContent   = (data && (data.detail || data.title))
+                    || (res.status
+                        ? 'The server said the request is invalid (HTTP ' + res.status
+                            + ') but we could not read the field list. Check your connection and try again.'
+                        : 'Validation failed.');
+                banner.style.display = 'block';
+            }
         } else if (res.status === 401) {
-            const emailInput    = form.email;
-            const passwordInput = form.password;
-            emailInput.classList.add('is-invalid');
-            passwordInput.classList.add('is-invalid');
-            banner.textContent   = data.message ?? 'Invalid credentials.';
+            const emailInput    = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            if (emailInput) emailInput.classList.add('is-invalid');
+            if (passwordInput) passwordInput.classList.add('is-invalid');
+            const msg = (data && (data.detail || data.title)) || 'Invalid credentials.';
+            banner.textContent   = msg;
             banner.style.display = 'block';
         } else {
-            banner.textContent   = data.message ?? 'Something went wrong. Please try again.';
+            banner.textContent   = bannerTextForUnknownError(res, data);
             banner.style.display = 'block';
         }
     } catch {
