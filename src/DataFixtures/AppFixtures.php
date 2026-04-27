@@ -6,6 +6,7 @@ use App\Entity\AuthorBook;
 use App\Entity\Authors;
 use App\Entity\BookCategory;
 use App\Entity\Books;
+use App\Entity\Borrows;
 use App\Entity\Categories;
 use App\Entity\Settings;
 use App\Entity\Users;
@@ -92,7 +93,7 @@ class AppFixtures extends Fixture
             ->setLastName('User')
             ->setEmail('admin@admin.com')
             ->setRole(Users::ROLE_ADMIN)
-            ->setBorrowLimit(10);
+            ->setBorrowLimit(15);
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'Admin12345'));
 
         $member = (new Users())
@@ -100,7 +101,7 @@ class AppFixtures extends Fixture
             ->setLastName('Member')
             ->setEmail('member@example.com')
             ->setRole(Users::ROLE_MEMBER)
-            ->setBorrowLimit(3);
+            ->setBorrowLimit(7);
         $member->setPassword($this->passwordHasher->hashPassword($member, 'Member12345'));
 
         $manager->persist($admin);
@@ -167,6 +168,8 @@ class AppFixtures extends Fixture
             }
         }
 
+        $this->seedOverdueBorrows($manager, $admin, $member, $books);
+
         $defaultLimit = (new Settings())
             ->setKey('default_borrow_limit')
             ->setValue('5')
@@ -179,5 +182,43 @@ class AppFixtures extends Fixture
         $manager->persist($defaultDays);
 
         $manager->flush();
+    }
+
+    /**
+     * Active overdue loans for admin overdue page / API (due before start of today).
+     *
+     * @param list<Books> $books
+     */
+    private function seedOverdueBorrows(ObjectManager $manager, Users $admin, Users $member, array $books): void
+    {
+        $adminBookIndices  = [99, 95, 98, 89, 83, 79, 68, 50, 44, 33, 20, 9];
+        $memberBookIndices = [96, 83, 77, 62, 26];
+
+        $today = new \DateTimeImmutable('today');
+        $n     = 0;
+
+        foreach ($adminBookIndices as $bookIndex) {
+            $dueDate    = $today->modify('-1 day')->modify(sprintf('-%d days', $n));
+            $borrowedAt = $dueDate->modify('-14 days');
+            $borrow = (new Borrows())
+                ->setBook($books[$bookIndex])
+                ->setMember($admin)
+                ->setBorrowedAt($borrowedAt)
+                ->setDueDate($dueDate);
+            $manager->persist($borrow);
+            ++$n;
+        }
+
+        foreach ($memberBookIndices as $bookIndex) {
+            $dueDate    = $today->modify('-1 day')->modify(sprintf('-%d days', $n));
+            $borrowedAt = $dueDate->modify('-14 days');
+            $borrow = (new Borrows())
+                ->setBook($books[$bookIndex])
+                ->setMember($member)
+                ->setBorrowedAt($borrowedAt)
+                ->setDueDate($dueDate);
+            $manager->persist($borrow);
+            ++$n;
+        }
     }
 }

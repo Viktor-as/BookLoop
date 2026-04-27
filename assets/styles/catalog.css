@@ -241,6 +241,12 @@
     color: #991b1b;
 }
 
+.catalog-status.overdue {
+    background: #ffedd5;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+}
+
 .catalog-status.self-borrowed {
     background: #e0e7ff;
     color: #3730a3;

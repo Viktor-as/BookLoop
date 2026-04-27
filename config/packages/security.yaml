@@ -40,9 +40,11 @@ security:
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/books/catalog, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/logout, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/overdue-borrows, roles: ROLE_ADMIN }
         - { path: ^/, roles: PUBLIC_ACCESS }
 
 when@test:

@@ -260,6 +260,130 @@ class BorrowsRepository extends ServiceEntityRepository
         ];
     }
 
+    private const OVERDUE_BORROWS_ADMIN_BASE_SQL = <<<'SQL'
+        SELECT
+            br.id AS borrow_id,
+            br.borrowed_at AS borrowed_at,
+            br.due_date AS due_date,
+            b.id AS book_id,
+            b.slug,
+            b.title,
+            u.first_name AS member_first_name,
+            u.last_name AS member_last_name,
+            GROUP_CONCAT(DISTINCT CONCAT(a.first_name, ' ', a.last_name) ORDER BY a.id SEPARATOR ', ') AS authors,
+            GROUP_CONCAT(DISTINCT c.name ORDER BY c.id SEPARATOR ', ') AS categories
+        FROM borrows br
+        INNER JOIN books b ON b.id = br.book_id
+        INNER JOIN users u ON u.id = br.member_id
+        LEFT JOIN author_book ab ON ab.book_id = b.id
+        LEFT JOIN authors a ON a.id = ab.author_id
+        LEFT JOIN book_category bc ON bc.book_id = b.id
+        LEFT JOIN categories c ON c.id = bc.category_id
+        SQL;
+
+    public function countOverdueBorrowsForAdmin(\DateTimeImmutable $startOfToday): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT COUNT(br.id) FROM borrows br WHERE br.returned_at IS NULL AND br.due_date < :startOfToday';
+
+        return (int) $conn->fetchOne(
+            $sql,
+            ['startOfToday' => $startOfToday->format('Y-m-d H:i:s')],
+        );
+    }
+
+    /**
+     * Paged active borrows whose due date is before the start of today (admin overdue API).
+     *
+     * @return array{
+     *     items: list<array{
+     *         borrowId: int,
+     *         bookId: int,
+     *         slug: string,
+     *         title: string,
+     *         authors: string|null,
+     *         categories: string|null,
+     *         borrowedAt: string,
+     *         dueDate: string,
+     *         memberName: string
+     *     }>,
+     *     total: int
+     * }
+     */
+    public function findOverdueBorrowPageForAdmin(\DateTimeImmutable $startOfToday, int $page, int $perPage): array
+    {
+        $page    = max(1, $page);
+        $perPage = min(100, max(1, $perPage));
+        $offset  = ($page - 1) * $perPage;
+
+        $total = $this->countOverdueBorrowsForAdmin($startOfToday);
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = self::OVERDUE_BORROWS_ADMIN_BASE_SQL
+            .' WHERE br.returned_at IS NULL AND br.due_date < :startOfToday'
+            .' GROUP BY br.id, br.borrowed_at, br.due_date, b.id, b.slug, b.title, u.first_name, u.last_name'
+            .' ORDER BY br.due_date ASC, br.borrowed_at ASC'
+            .' LIMIT :limit OFFSET :offset';
+
+        $rows = $conn->fetchAllAssociative(
+            $sql,
+            [
+                'startOfToday' => $startOfToday->format('Y-m-d H:i:s'),
+                'limit'        => $perPage,
+                'offset'       => $offset,
+            ],
+            [
+                'limit'  => ParameterType::INTEGER,
+                'offset' => ParameterType::INTEGER,
+            ],
+        );
+
+        $items = array_map(fn (array $r): array => $this->mapOverdueBorrowAdminRow($r), $rows);
+
+        return [
+            'items' => $items,
+            'total' => $total,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     *
+     * @return array{
+     *     borrowId: int,
+     *     bookId: int,
+     *     slug: string,
+     *     title: string,
+     *     authors: string|null,
+     *     categories: string|null,
+     *     borrowedAt: string,
+     *     dueDate: string,
+     *     memberName: string
+     * }
+     */
+    private function mapOverdueBorrowAdminRow(array $row): array
+    {
+        $borrowedAt = new \DateTimeImmutable((string) $row['borrowed_at']);
+        $dueDate    = new \DateTimeImmutable((string) $row['due_date']);
+        $first      = trim((string) ($row['member_first_name'] ?? ''));
+        $last       = trim((string) ($row['member_last_name'] ?? ''));
+        $memberName = trim($first.' '.$last);
+
+        return [
+            'borrowId'   => (int) $row['borrow_id'],
+            'bookId'     => (int) $row['book_id'],
+            'slug'       => (string) $row['slug'],
+            'title'      => (string) $row['title'],
+            'authors'    => $row['authors'] !== null && $row['authors'] !== '' ? (string) $row['authors'] : null,
+            'categories' => $row['categories'] !== null && $row['categories'] !== '' ? (string) $row['categories'] : null,
+            'borrowedAt' => $borrowedAt->format(\DateTimeInterface::ATOM),
+            'dueDate'    => $dueDate->format(\DateTimeInterface::ATOM),
+            'memberName' => $memberName !== '' ? $memberName : '—',
+        ];
+    }
+
     //    /**
     //     * @return Borrows[] Returns an array of Borrows objects
     //     */

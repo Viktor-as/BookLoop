@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Overdue borrows — BookLoop{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/catalog.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="catalog-header">
+    <h1>Overdue borrows</h1>
+    <p>Books still on loan past their due date.</p>
+</div>
+
+<div id="overdue-error" class="catalog-error" style="display:none;" role="alert"></div>
+<div id="overdue-loading" class="catalog-loading">Loading overdue loans…</div>
+<ul id="overdue-list" class="catalog-list" aria-live="polite"></ul>
+<div id="overdue-pagination" class="catalog-pagination" role="navigation" aria-label="Overdue borrows pagination"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/overdue-borrows.js') }}"></script>
+{% endblock %}
