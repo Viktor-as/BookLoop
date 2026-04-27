@@ -81,6 +81,22 @@ class AppFixtures extends Fixture
         'Midnight\'s Children', 'Shantaram', 'The Power of Now', 'Man\'s Search for Meaning', 'Meditations',
     ];
 
+    /** @var list<string> Demo blurbs for the book detail page (not real synopses). */
+    private const BOOK_DESCRIPTION_BLURBS = [
+        'A well-loved volume in our demo catalog. Borrow it to explore themes and style at your own pace. Staff picks rotate monthly.',
+        'Popular with readers who enjoy thoughtful pacing and memorable characters. Ideal for a two-week loan over a quiet weekend.',
+        'This edition is part of the BookLoop seed library. Descriptions here are placeholder text for layout and admin testing only.',
+        'Fiction readers often request this title around book-club season. Check availability before planning a group read.',
+        'A cornerstone title for testing categories, authors, and borrow limits. Return on time so the next patron can enjoy it.',
+        'Short chapters make it approachable for busy schedules. The catalog entry highlights authors and categories from fixtures.',
+        'Historical context and narrative voice drive this pick. Use the detail page to confirm metadata before borrowing.',
+        'Translated and domestic editions may differ; our record tracks the copy held at this branch. Ask a librarian for notes.',
+        'Award buzz aside, this copy is here for hands-on QA: pagination, overdue rules, and admin edits all exercise real flows.',
+        'Mystery shelves stay busy—place a hold mentally by checking due dates on the home catalog. Descriptions stay off the grid.',
+        'Science and nature readers appreciate the longer loan window when enabled. Description text is synthetic demo content.',
+        'Poetry and essay collections benefit from slow reading. This blurb exists solely to fill the database with sample prose.',
+    ];
+
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly SluggerInterface $slugger,
@@ -132,7 +148,10 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < self::BOOK_COUNT; ++$i) {
             $title = self::BOOK_TITLES[$i];
             $slug  = $this->slugger->slug($title)->lower()->toString() . '-' . $i;
-            $book  = (new Books())->setTitle($title)->setSlug($slug);
+            $book  = (new Books())
+                ->setTitle($title)
+                ->setSlug($slug)
+                ->setDescription(self::BOOK_DESCRIPTION_BLURBS[$i % \count(self::BOOK_DESCRIPTION_BLURBS)]);
 
             if ($i % 4 === 0) {
                 $book->setBorrowDaysLimit([7, 14, 21, 28][(int) ($i / 4) % 4]);

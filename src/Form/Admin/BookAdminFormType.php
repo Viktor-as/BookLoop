@@ -11,12 +11,14 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Count;
+use Symfony\Component\Validator\Constraints\Length;
 
 final class BookAdminFormType extends AbstractType
 {
@@ -32,6 +34,18 @@ final class BookAdminFormType extends AbstractType
             ->add('slug', TextType::class, [
                 'label' => 'Slug',
                 'help'  => 'Unique URL segment (e.g. nineteen-eighty-four-0).',
+            ])
+            ->add('description', TextareaType::class, [
+                'label'    => 'Description',
+                'required' => false,
+                'attr'     => ['rows' => 6],
+                'help'     => 'Shown on the public book detail page only (not in the catalog list).',
+                'constraints' => [
+                    new Length([
+                        'max'        => 10000,
+                        'maxMessage' => 'Description cannot exceed {{ limit }} characters.',
+                    ]),
+                ],
             ])
             ->add('borrowDaysLimit', IntegerType::class, [
                 'label'    => 'Borrow days limit',

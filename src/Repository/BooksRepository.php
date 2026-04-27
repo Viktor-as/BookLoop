@@ -143,6 +143,7 @@ class BooksRepository extends ServiceEntityRepository
      *     title: string,
      *     authors: string|null,
      *     categories: string|null,
+     *     description: string|null,
      *     available: bool,
      *     borrowDaysLimit: int|null
      * }|null
@@ -156,6 +157,7 @@ class BooksRepository extends ServiceEntityRepository
                 b.id,
                 b.slug,
                 b.title,
+                b.description,
                 b.borrow_days_limit AS borrowDaysLimit,
                 (
                     (SELECT COUNT(*)
@@ -170,7 +172,7 @@ class BooksRepository extends ServiceEntityRepository
             LEFT JOIN book_category bc ON bc.book_id = b.id
             LEFT JOIN categories c ON c.id = bc.category_id
             WHERE b.slug = :slug
-            GROUP BY b.id, b.slug, b.title, b.borrow_days_limit
+            GROUP BY b.id, b.slug, b.title, b.description, b.borrow_days_limit
             SQL;
 
         $row = $conn->fetchAssociative($sql, ['slug' => $slug], ['slug' => ParameterType::STRING]);
@@ -178,12 +180,16 @@ class BooksRepository extends ServiceEntityRepository
             return null;
         }
 
+        $descRaw     = $row['description'];
+        $description = $descRaw !== null && $descRaw !== '' ? (string) $descRaw : null;
+
         return [
             'id'               => (int) $row['id'],
             'slug'             => (string) $row['slug'],
             'title'            => (string) $row['title'],
             'authors'          => $row['authors'] !== null && $row['authors'] !== '' ? (string) $row['authors'] : null,
             'categories'       => $row['categories'] !== null && $row['categories'] !== '' ? (string) $row['categories'] : null,
+            'description'      => $description,
             'available'        => (bool) (int) $row['available'],
             'borrowDaysLimit'  => $row['borrowDaysLimit'] !== null ? (int) $row['borrowDaysLimit'] : null,
         ];

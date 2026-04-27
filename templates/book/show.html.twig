@@ -25,6 +25,9 @@
                 <span class="catalog-meta-value">{{ book.categories ?? '—' }}</span>
             </div>
         </div>
+        {% if book.description %}
+            <div class="book-detail-description">{{ book.description|nl2br }}</div>
+        {% endif %}
         {% if member_has_active_borrow %}
             <span class="catalog-status self-borrowed">Already borrowed by you</span>
         {% elseif book.available %}

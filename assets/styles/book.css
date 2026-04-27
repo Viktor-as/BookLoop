@@ -45,6 +45,17 @@
     line-height: 1.35;
 }
 
+.book-detail-description {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    max-width: 42rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #475569;
+}
+
+
 .book-borrow-card h2 {
     font-size: 1rem;
     font-weight: 600;

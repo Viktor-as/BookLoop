@@ -29,6 +29,14 @@
         {% endif %}
     </div>
     <div class="admin-form-row">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description) }}
+        {{ form_errors(form.description) }}
+        {% if form.description.vars.help %}
+            <small style="color:#64748b;display:block;margin-top:0.25rem;">{{ form.description.vars.help }}</small>
+        {% endif %}
+    </div>
+    <div class="admin-form-row">
         {{ form_label(form.borrowDaysLimit) }}
         {{ form_widget(form.borrowDaysLimit) }}
         {{ form_errors(form.borrowDaysLimit) }}

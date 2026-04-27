@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\BooksRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -21,6 +22,9 @@ class Books
 
     #[ORM\Column(length: 255, unique: true)]
     private ?string $slug = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $borrowDaysLimit = null;
@@ -56,6 +60,18 @@ class Books
     public function setSlug(string $slug): static
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
