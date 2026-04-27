@@ -1,3 +1,5 @@
+import { getCookie } from "books_ui_utils";
+
 (function () {
     const form = document.getElementById("book-borrow-form");
     const feedback = document.getElementById("book-borrow-feedback");
@@ -15,16 +17,6 @@
 
     const CSRF_COOKIE = "XSRF-TOKEN";
     const CSRF_HEADER = "X-XSRF-TOKEN";
-
-    function getCookie(name) {
-        const row = document.cookie
-            .split("; ")
-            .find((c) => c.startsWith(name + "="));
-        if (!row) {
-            return null;
-        }
-        return decodeURIComponent(row.slice(name.length + 1));
-    }
 
     function showFeedback(text, kind) {
         feedback.textContent = text;

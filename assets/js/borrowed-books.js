@@ -1,3 +1,5 @@
+import { esc, getCookie, formatDateLabel, detailHref } from "books_ui_utils";
+
 (function () {
     const API_BASE = "/api/me/borrowed-books";
     const PER_PAGE = 5;
@@ -24,22 +26,6 @@
         !paginationHistory
     ) {
         return;
-    }
-
-    function esc(s) {
-        const d = document.createElement("div");
-        d.textContent = s;
-        return d.innerHTML;
-    }
-
-    function getCookie(name) {
-        const row = document.cookie
-            .split("; ")
-            .find((c) => c.startsWith(name + "="));
-        if (!row) {
-            return null;
-        }
-        return decodeURIComponent(row.slice(name.length + 1));
     }
 
     function showError(msg) {
@@ -84,28 +70,6 @@
         q.set("page", String(page));
         q.set("perPage", String(PER_PAGE));
         return `${API_BASE}?${q.toString()}`;
-    }
-
-    function formatDateLabel(iso) {
-        if (!iso || typeof iso !== "string") {
-            return "—";
-        }
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) {
-            return "—";
-        }
-        return d.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-    }
-
-    function detailHref(slug) {
-        if (typeof slug === "string" && slug.length > 0) {
-            return `/books/${encodeURIComponent(slug)}`;
-        }
-        return "#";
     }
 
     function lastPageFromTotal(total, perPage) {

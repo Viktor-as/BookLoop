@@ -1,3 +1,5 @@
+import { esc, detailHref } from "books_ui_utils";
+
 const PER_PAGE = 25;
 const API_URL = "/api/books/catalog";
 
@@ -82,12 +84,6 @@ function pushBrowserUrl(page) {
     window.history.pushState({ page }, "", url);
 }
 
-function esc(s) {
-    const d = document.createElement("div");
-    d.textContent = s;
-    return d.innerHTML;
-}
-
 function renderList(items) {
     const list = document.getElementById("catalog-list");
     if (!items.length) {
@@ -120,9 +116,7 @@ function renderList(items) {
                 typeof item.slug === "string" && item.slug.length > 0
                     ? item.slug
                     : "";
-            const detailHref = slug
-                ? `/books/${encodeURIComponent(slug)}`
-                : "#";
+            const href = detailHref(slug);
             const actionLabel =
                 item.available && !borrowedByMe
                     ? "Read more / Borrow"
@@ -142,7 +136,7 @@ function renderList(items) {
             </div>
             <div class="catalog-card-footer">
                 <span class="catalog-status ${statusClass}">${esc(statusLabel)}</span>
-                <a href="${detailHref}" class="catalog-card-action">${esc(actionLabel)}</a>
+                <a href="${href}" class="catalog-card-action">${esc(actionLabel)}</a>
             </div>
         </li>`;
         })

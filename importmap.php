@@ -16,4 +16,7 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'books_ui_utils' => [
+        'path' => './assets/js/books-ui-utils.js',
+    ],
 ];

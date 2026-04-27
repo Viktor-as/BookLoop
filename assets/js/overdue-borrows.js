@@ -1,3 +1,5 @@
+import { esc, formatDateLabel, detailHref } from "books_ui_utils";
+
 (function () {
     const API_URL = "/api/admin/overdue-borrows";
     const BASE_PATH = "/overdue-borrows";
@@ -10,12 +12,6 @@
 
     if (!loadingEl || !errorEl || !listEl || !paginationEl) {
         return;
-    }
-
-    function esc(s) {
-        const d = document.createElement("div");
-        d.textContent = s;
-        return d.innerHTML;
     }
 
     function getPageFromUrl() {
@@ -38,28 +34,6 @@
         q.set("page", String(page));
         q.set("perPage", String(PER_PAGE));
         return `${API_URL}?${q.toString()}`;
-    }
-
-    function formatDateLabel(iso) {
-        if (!iso || typeof iso !== "string") {
-            return "—";
-        }
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) {
-            return "—";
-        }
-        return d.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-    }
-
-    function detailHref(slug) {
-        if (typeof slug === "string" && slug.length > 0) {
-            return `/books/${encodeURIComponent(slug)}`;
-        }
-        return "#";
     }
 
     function renderCard(item) {

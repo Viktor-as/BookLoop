@@ -66,6 +66,6 @@
 
 {% block javascripts %}
     {% if app.user and book.available and not member_has_active_borrow %}
-        <script src="{{ asset('js/book-borrow.js') }}" defer></script>
+        <script type="module" src="{{ asset('js/book-borrow.js') }}" defer></script>
     {% endif %}
 {% endblock %}
