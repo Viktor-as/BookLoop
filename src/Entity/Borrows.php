@@ -6,6 +6,8 @@ use App\Repository\BorrowsRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BorrowsRepository::class)]
+#[ORM\Table(name: 'borrows')]
+#[ORM\Index(name: 'idx_borrows_book_returned', fields: ['book', 'returnedAt'])]
 #[ORM\HasLifecycleCallbacks]
 class Borrows
 {
