@@ -30,15 +30,7 @@ final class WebJwtFailureResponseListener
             return;
         }
 
-        $exception = $event->getException();
-        $message   = $exception?->getMessageKey() ?? 'Authentication failed';
-        if ($exception !== null && $exception->getMessageData() !== []) {
-            $message = strtr($message, $exception->getMessageData());
-        }
-
-        $html = $this->twig->render('error/session_invalid.html.twig', [
-            'technicalMessage' => $message,
-        ]);
+        $html = $this->twig->render('error/session_invalid.html.twig');
 
         $response = new Response($html, Response::HTTP_UNAUTHORIZED, [
             'Content-Type' => 'text/html; charset=UTF-8',
