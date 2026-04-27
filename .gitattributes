@@ -1,0 +1,6 @@
+# Keep shell scripts and Linux config files LF-terminated, even on Windows
+# checkouts. This matters for files executed inside the Docker images.
+*.sh         text eol=lf
+Dockerfile   text eol=lf
+*.dockerfile text eol=lf
+docker/**    text eol=lf

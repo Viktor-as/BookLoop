@@ -13,7 +13,7 @@ lexik_jwt_authentication:
         BEARER:
             samesite: strict
             httpOnly: true
-            secure: true
+            secure: '%env(bool:JWT_COOKIE_SECURE)%'
             path: /
             domain: null
             split: []

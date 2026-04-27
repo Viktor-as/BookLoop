@@ -1,5 +1,6 @@
 
 ###> symfony/framework-bundle ###
+/.docker_data/
 /.cursor/
 /.env
 /.env.dev

@@ -1,25 +1,49 @@
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-    healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
-      timeout: 5s
-      retries: 5
-      start_period: 60s
+  mysql:
+    image: mysql:8.0
+    container_name: readloop-mysql
+    restart: unless-stopped
+    env_file: .env.example
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+      - ./.docker_data/mysql:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "3307:3306"
 
-volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: readloop-app
+    restart: unless-stopped
+    env_file: .env.example
+    # Regex end-`$` is set here: Compose + dotenv mangle a lone `$` in .env values.
+    environment:
+      CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$$'
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./.docker_data/var:/var/www/html/var
+      - ./.docker_data/jwt:/var/www/html/config/jwt
+    ports:
+      - "8080:80"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: readloop-phpmyadmin
+    restart: unless-stopped
+    env_file: .env.example
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8081:80"

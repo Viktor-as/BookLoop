@@ -16,10 +16,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
- * Demo data for local development and onboarding.
+ * Demo data for onboarding and the Docker production-style stack (first boot).
  *
  * Load: php bin/console doctrine:fixtures:load --no-interaction
- * (Wipes the database first — use only on dev/staging.)
+ * (Wipes the database first — do not run against production data you need to keep.)
  */
 class AppFixtures extends Fixture
 {

@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Default when unset: secure cookies (HTTPS). Docker Compose sets JWT_COOKIE_SECURE=0 for plain HTTP demos.
+    env(JWT_COOKIE_SECURE): '1'
 
 services:
     # default configuration for services in *this* file
@@ -18,6 +20,10 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Service\AuthCookieService:
+        arguments:
+            $useSecureCookies: '%env(bool:JWT_COOKIE_SECURE)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
