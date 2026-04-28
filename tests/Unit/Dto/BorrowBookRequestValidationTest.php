@@ -19,22 +19,28 @@ final class BorrowBookRequestValidationTest extends TestCase
 
     public function testDaysRequired(): void
     {
-        $input = new BorrowBookRequest();
+        $input = new BorrowBookRequest(bookSlug: 'clean-code');
         $violations = $this->validator()->validate($input);
         self::assertGreaterThan(0, $violations->count());
-        self::assertStringContainsString('days', (string) $violations[0]->getPropertyPath());
+        self::assertContains(
+            'days',
+            array_map(
+                static fn ($violation) => (string) $violation->getPropertyPath(),
+                iterator_to_array($violations)
+            )
+        );
     }
 
     public function testDaysMustBePositiveInteger(): void
     {
-        $input = new BorrowBookRequest(days: 0);
+        $input = new BorrowBookRequest(bookSlug: 'clean-code', days: 0);
         $violations = $this->validator()->validate($input);
         self::assertGreaterThan(0, $violations->count());
     }
 
     public function testValidDaysPasses(): void
     {
-        $input = new BorrowBookRequest(days: 7);
+        $input = new BorrowBookRequest(bookSlug: 'clean-code', days: 7);
         $violations = $this->validator()->validate($input);
         self::assertCount(0, $violations);
     }
