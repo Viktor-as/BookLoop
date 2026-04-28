@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-final class AdminOverdueBorrowsController extends AbstractController
+final class OverdueBorrowsController extends AbstractController
 {
     use ApiControllerTrait;
 
@@ -25,7 +25,7 @@ final class AdminOverdueBorrowsController extends AbstractController
         private readonly BorrowsRepository $borrowsRepository,
     ) {}
 
-    #[Route('/api/v1/admin/borrows/overdue', name: 'api_v1_admin_borrows_overdue', methods: ['GET'])]
+    #[Route('/api/v1/borrows/overdue', name: 'api_v1_borrows_overdue', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function __invoke(Request $request): JsonResponse
     {

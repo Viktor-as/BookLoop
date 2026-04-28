@@ -69,6 +69,16 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
         },
+        "assets:build": "php bin/console asset-map:compile",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "symfony serve --no-tls"
+        ],
+        "dev:start": [
+            "@assets:build",
+            "@serve"
+        ],
+        "dev:refresh-assets": "php bin/console asset-map:compile",
         "post-install-cmd": [
             "@auto-scripts"
         ],

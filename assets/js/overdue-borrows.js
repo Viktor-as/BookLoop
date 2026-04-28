@@ -6,7 +6,7 @@ import {
 } from "books_ui_utils";
 
 (function () {
-    const API_URL = "/api/v1/admin/borrows/overdue";
+    const API_URL = "/api/v1/borrows/overdue";
     const BASE_PATH = "/overdue-borrows";
     const PER_PAGE = 10;
 

@@ -65,7 +65,7 @@ You need PHP 8.2+, Composer, and MySQL 8. **`.env.example` is built for the Comp
 5. `php bin/console doctrine:migrations:migrate -n`
 6. If you use a test database: `APP_ENV=test php bin/console doctrine:migrations:migrate -n` (or set `DATABASE_URL` in **`.env.test`** and run the same for that URL).
 7. `php bin/console doctrine:fixtures:load -n`
-8. `symfony serve` (or point your web server at `public/`).
+8. `composer dev:start` (or point your web server at `public/`).
 
 ## Project layout
 
