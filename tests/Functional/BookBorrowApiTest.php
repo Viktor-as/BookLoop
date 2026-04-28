@@ -58,6 +58,7 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $location = $response->headers->get('Location');
         self::assertIsString($location);
         self::assertStringContainsString('/api/v1/borrows/', $location);
+        self::assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
 
         $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_CREATED);
         self::assertArrayHasKey('borrowId', $data);

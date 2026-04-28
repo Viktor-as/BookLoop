@@ -90,7 +90,11 @@ final class BookCatalogController extends AbstractController
             ),
         );
 
-        return $this->json($payload);
+        $response = $this->json($payload);
+        $this->applyPrivateRevalidation($response);
+        $etag = hash('sha256', (string) $response->getContent());
+
+        return $this->applyEtagAndHandleConditional($request, $response, $etag);
     }
 
     private function buildCatalogFilters(Request $request): CatalogFilters|JsonResponse

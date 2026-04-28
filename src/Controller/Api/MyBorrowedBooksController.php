@@ -69,10 +69,12 @@ final class MyBorrowedBooksController extends AbstractController
             total: $data['total'],
         );
 
-        return $this->json(
+        $response = $this->json(
             $payload,
             Response::HTTP_OK,
             ['Content-Type' => 'application/json; charset=UTF-8'],
         );
+
+        return $this->applyNoStore($response);
     }
 }

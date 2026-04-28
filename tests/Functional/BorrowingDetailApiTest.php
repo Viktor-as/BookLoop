@@ -29,6 +29,7 @@ final class BorrowingDetailApiTest extends ApiWebTestCase
             Response::HTTP_NOT_FOUND,
             'borrow_not_found',
         );
+        self::assertStringContainsString('no-store', (string) $this->client->getResponse()->headers->get('Cache-Control'));
     }
 
     public function testDetailOkAfterBorrow(): void
@@ -56,5 +57,6 @@ final class BorrowingDetailApiTest extends ApiWebTestCase
         $data = JsonTestAssertions::assertJsonResponse($this->client->getResponse(), Response::HTTP_OK);
         self::assertArrayHasKey('borrowId', $data);
         self::assertSame($borrowId, (int) $data['borrowId']);
+        self::assertStringContainsString('no-store', (string) $this->client->getResponse()->headers->get('Cache-Control'));
     }
 }

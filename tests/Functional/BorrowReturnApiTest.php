@@ -48,6 +48,7 @@ final class BorrowReturnApiTest extends ApiWebTestCase
         $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_OK);
         self::assertArrayHasKey('message', $data);
         self::assertArrayHasKey('item', $data);
+        self::assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
     }
 
     public function testReturnUnknownBorrowReturns404(): void

@@ -80,6 +80,8 @@ final class OverdueBorrowsController extends AbstractController
             lastPage: $lastPage,
         );
 
-        return $this->json($payload, Response::HTTP_OK, [], ['json_encode_options' => \JSON_UNESCAPED_SLASHES]);
+        $response = $this->json($payload, Response::HTTP_OK, [], ['json_encode_options' => \JSON_UNESCAPED_SLASHES]);
+
+        return $this->applyNoStore($response);
     }
 }

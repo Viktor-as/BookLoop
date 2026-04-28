@@ -6,6 +6,7 @@ use App\Api\ApiProblem;
 use App\Api\ApiProblemFactory;
 use App\Entity\Users;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
@@ -18,11 +19,13 @@ trait ApiControllerTrait
     {
         $status = $httpStatus ?? $problem->status;
 
-        return new JsonResponse(
+        $response = new JsonResponse(
             $problem->toArray(),
             $status,
             ['Content-Type' => 'application/problem+json; charset=UTF-8'],
         );
+
+        return $this->applyNoStore($response);
     }
 
     private function requireUser(): Users|JsonResponse
@@ -43,5 +46,31 @@ trait ApiControllerTrait
     private function apiProblemFromViolations(ConstraintViolationListInterface $violations): ApiProblem
     {
         return ApiProblemFactory::fromViolations($violations);
+    }
+
+    private function applyNoStore(Response $response): Response
+    {
+        $response->headers->set('Cache-Control', 'no-store, private');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
+    }
+
+    private function applyPrivateRevalidation(Response $response): Response
+    {
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-cache', true);
+        $response->headers->addCacheControlDirective('must-revalidate', true);
+
+        return $response;
+    }
+
+    private function applyEtagAndHandleConditional(Request $request, Response $response, string $etag): Response
+    {
+        $response->setEtag($etag);
+        $response->isNotModified($request);
+
+        return $response;
     }
 }

@@ -60,7 +60,7 @@ final class BorrowController extends AbstractController
             dueDate: $result->dueDate?->format(\DateTimeInterface::ATOM),
         );
 
-        return $this->json(
+        $response = $this->json(
             $payload,
             Response::HTTP_CREATED,
             [
@@ -68,6 +68,8 @@ final class BorrowController extends AbstractController
                 'Content-Type' => 'application/json; charset=UTF-8',
             ],
         );
+
+        return $this->applyNoStore($response);
     }
 
     #[Route('/api/v1/borrows/{id}', name: 'api_v1_borrows_get', methods: ['GET'], requirements: ['id' => '\d+'])]
@@ -91,7 +93,9 @@ final class BorrowController extends AbstractController
             ));
         }
 
-        return $this->json(BorrowingItemResponse::fromRow($row));
+        $response = $this->json(BorrowingItemResponse::fromRow($row));
+
+        return $this->applyNoStore($response);
     }
 
     #[Route('/api/v1/borrows/{id}', name: 'api_v1_borrows_patch', methods: ['PATCH'], requirements: ['id' => '\d+'])]
@@ -132,9 +136,11 @@ final class BorrowController extends AbstractController
             item: $row !== null ? BorrowingItemResponse::fromRow($row) : null,
         );
 
-        return $this->json($payload, Response::HTTP_OK, [
+        $response = $this->json($payload, Response::HTTP_OK, [
             'Content-Type' => 'application/json; charset=UTF-8',
         ]);
+
+        return $this->applyNoStore($response);
     }
 
     private function apiProblemForBorrowResult(BorrowBookResult $r): ApiProblem
