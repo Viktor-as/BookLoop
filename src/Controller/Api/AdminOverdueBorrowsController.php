@@ -25,7 +25,7 @@ final class AdminOverdueBorrowsController extends AbstractController
         private readonly BorrowsRepository $borrowsRepository,
     ) {}
 
-    #[Route('/api/admin/overdue-borrows', name: 'api_admin_overdue_borrows', methods: ['GET'])]
+    #[Route('/api/v1/admin/borrows/overdue', name: 'api_v1_admin_borrows_overdue', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function __invoke(Request $request): JsonResponse
     {

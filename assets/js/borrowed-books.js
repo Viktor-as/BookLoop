@@ -7,7 +7,7 @@ import {
 } from "books_ui_utils";
 
 (function () {
-    const API_BASE = "/api/me/borrowed-books";
+    const API_BASE = "/api/v1/users/me/borrows";
     const PER_PAGE = 5;
     const CSRF_COOKIE = "XSRF-TOKEN";
     const CSRF_HEADER = "X-XSRF-TOKEN";
@@ -425,16 +425,16 @@ import {
 
         try {
             const res = await fetch(
-                `/api/borrows/${encodeURIComponent(String(borrowId))}/return`,
+                `/api/v1/borrows/${encodeURIComponent(String(borrowId))}`,
                 {
-                    method: "POST",
+                    method: "PATCH",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                         Accept: "application/json",
                         [CSRF_HEADER]: csrf,
                     },
-                    body: "{}",
+                    body: JSON.stringify({ returned: true }),
                 },
             );
 

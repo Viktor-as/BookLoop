@@ -30,7 +30,7 @@ final class LoginController extends AbstractController
         private readonly AuthCookieService           $cookieService,
     ) {}
 
-    #[Route('/api/auth/login', name: 'api_auth_login', methods: ['POST'])]
+    #[Route('/api/v1/auth/login', name: 'api_v1_auth_login', methods: ['POST'])]
     public function login(
         #[MapRequestPayload(
             acceptFormat: 'json',

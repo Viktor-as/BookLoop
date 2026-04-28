@@ -30,7 +30,7 @@ final class RegistrationController extends AbstractController
         private readonly AuthCookieService           $cookieService,
     ) {}
 
-    #[Route('/api/auth/register', name: 'api_auth_register', methods: ['POST'])]
+    #[Route('/api/v1/auth/register', name: 'api_v1_auth_register', methods: ['POST'])]
     public function register(
         #[MapRequestPayload(
             acceptFormat: 'json',

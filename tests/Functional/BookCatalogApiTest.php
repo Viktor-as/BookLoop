@@ -12,7 +12,7 @@ final class BookCatalogApiTest extends WebTestCase
     public function testCatalogReturnsPagedShape(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/books/catalog');
+        $client->request('GET', '/api/v1/books');
 
         $data = JsonTestAssertions::assertJsonResponse($client->getResponse(), 200);
         self::assertArrayHasKey('page', $data);

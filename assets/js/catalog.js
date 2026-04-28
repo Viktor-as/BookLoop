@@ -1,7 +1,7 @@
 import { esc, detailHref, bindErrorPanel } from "books_ui_utils";
 
 const PER_PAGE = 25;
-const API_URL = "/api/books/catalog";
+const API_URL = "/api/v1/books";
 
 function getPageFromUrl() {
     const p = new URLSearchParams(window.location.search).get("page");
@@ -311,9 +311,25 @@ function bindFilters() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function initCatalogPage() {
+    if (
+        !document.getElementById("catalog-filters") ||
+        !document.getElementById("catalog-loading") ||
+        !document.getElementById("catalog-error") ||
+        !document.getElementById("catalog-list") ||
+        !document.getElementById("catalog-pagination")
+    ) {
+        return;
+    }
+
     populateFormFromUrl();
     bindFilters();
     bindPagination();
     loadCatalog(getPageFromUrl());
-});
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCatalogPage, { once: true });
+} else {
+    initCatalogPage();
+}

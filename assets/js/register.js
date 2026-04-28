@@ -105,7 +105,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     };
 
     try {
-        const res  = await fetch('/api/auth/register', {
+        const res  = await fetch('/api/v1/auth/register', {
             method:      'POST',
             credentials: 'include',
             headers:     {

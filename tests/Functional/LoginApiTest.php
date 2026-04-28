@@ -17,7 +17,7 @@ final class LoginApiTest extends ApiWebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/auth/login',
+            '/api/v1/auth/login',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -41,7 +41,7 @@ final class LoginApiTest extends ApiWebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/auth/login',
+            '/api/v1/auth/login',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -66,7 +66,7 @@ final class LoginApiTest extends ApiWebTestCase
 
         $this->client->request(
             'POST',
-            '/api/auth/login',
+            '/api/v1/auth/login',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -97,7 +97,7 @@ final class LoginApiTest extends ApiWebTestCase
 
         $this->client->request(
             'POST',
-            '/api/auth/login',
+            '/api/v1/auth/login',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],

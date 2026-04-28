@@ -30,7 +30,7 @@ final class BookCatalogController extends AbstractController
         private readonly BorrowsRepository $borrowsRepository,
     ) {}
 
-    #[Route('/api/books/catalog', name: 'api_books_catalog', methods: ['GET'])]
+    #[Route('/api/v1/books', name: 'api_v1_books_index', methods: ['GET'])]
     public function __invoke(Request $request): JsonResponse
     {
         $pageRaw    = $request->query->get('page', '1');

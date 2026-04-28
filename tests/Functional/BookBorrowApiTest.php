@@ -17,11 +17,11 @@ final class BookBorrowApiTest extends ApiWebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/books/any-slug/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 7}',
+            '{"bookSlug":"any-slug","days":7}',
         );
 
         $response = $this->client->getResponse();
@@ -45,11 +45,11 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 7}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 7], \JSON_THROW_ON_ERROR),
         );
 
         $response = $this->client->getResponse();
@@ -57,7 +57,7 @@ final class BookBorrowApiTest extends ApiWebTestCase
         self::assertTrue($response->headers->has('Location'));
         $location = $response->headers->get('Location');
         self::assertIsString($location);
-        self::assertStringContainsString('/api/borrows/', $location);
+        self::assertStringContainsString('/api/v1/borrows/', $location);
 
         $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_CREATED);
         self::assertArrayHasKey('borrowId', $data);
@@ -77,7 +77,7 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -103,11 +103,11 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 0}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 0], \JSON_THROW_ON_ERROR),
         );
 
         JsonTestAssertions::assertJsonProblem(
@@ -129,11 +129,11 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 7, "foo": 1}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 7, 'foo' => 1], \JSON_THROW_ON_ERROR),
         );
 
         $data = JsonTestAssertions::assertJsonProblem(
@@ -158,11 +158,11 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $this->loginAs($other->getEmail(), 'Other123');
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 7}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 7], \JSON_THROW_ON_ERROR),
         );
 
         JsonTestAssertions::assertJsonProblem(
@@ -185,11 +185,11 @@ final class BookBorrowApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 7}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 7], \JSON_THROW_ON_ERROR),
         );
 
         JsonTestAssertions::assertJsonProblem(

@@ -19,7 +19,7 @@ final class PublicHttpSmokeTest extends WebTestCase
     public function testPublicCatalogReturnsOk(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/books/catalog');
+        $client->request('GET', '/api/v1/books');
         self::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
     }
 }

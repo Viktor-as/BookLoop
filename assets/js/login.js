@@ -97,7 +97,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     };
 
     try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('/api/v1/auth/login', {
             method:      'POST',
             credentials: 'include',
             headers:     {

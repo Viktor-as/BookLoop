@@ -25,17 +25,24 @@ final class BorrowReturnApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 7}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 7], \JSON_THROW_ON_ERROR),
         );
         self::assertSame(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
         $borrowPayload = json_decode((string) $this->client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         $borrowId = (int) $borrowPayload['borrowId'];
 
-        $this->client->request('POST', '/api/borrows/' . $borrowId . '/return');
+        $this->client->request(
+            'PATCH',
+            '/api/v1/borrows/' . $borrowId,
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            '{"returned": true}',
+        );
 
         $response = $this->client->getResponse();
         $data = JsonTestAssertions::assertJsonResponse($response, Response::HTTP_OK);
@@ -52,7 +59,14 @@ final class BorrowReturnApiTest extends ApiWebTestCase
         $member = TestEntityFactory::persistMember($em, $hasher, $suffix, $plain);
 
         $this->loginAs($member->getEmail(), $plain);
-        $this->client->request('POST', '/api/borrows/999999999/return');
+        $this->client->request(
+            'PATCH',
+            '/api/v1/borrows/999999999',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            '{"returned": true}',
+        );
 
         JsonTestAssertions::assertJsonProblem(
             $this->client->getResponse(),

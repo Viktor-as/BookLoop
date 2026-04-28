@@ -69,19 +69,16 @@ import { getCookie } from "books_ui_utils";
         submitBtn.disabled = true;
 
         try {
-            const res = await fetch(
-                `/api/books/${encodeURIComponent(slug)}/borrow`,
-                {
-                    method: "POST",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        [CSRF_HEADER]: csrf,
-                    },
-                    body: JSON.stringify({ days }),
+            const res = await fetch("/api/v1/borrows", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    [CSRF_HEADER]: csrf,
                 },
-            );
+                body: JSON.stringify({ bookSlug: slug, days }),
+            });
 
             let data = {};
             try {

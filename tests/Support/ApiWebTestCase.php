@@ -22,7 +22,7 @@ abstract class ApiWebTestCase extends WebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/auth/login',
+            '/api/v1/auth/login',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],

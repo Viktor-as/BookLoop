@@ -22,7 +22,7 @@ final class BorrowingDetailApiTest extends ApiWebTestCase
         $member = TestEntityFactory::persistMember($em, $hasher, $suffix, $plain);
 
         $this->loginAs($member->getEmail(), $plain);
-        $this->client->request('GET', '/api/borrows/999999999');
+        $this->client->request('GET', '/api/v1/borrows/999999999');
 
         JsonTestAssertions::assertJsonProblem(
             $this->client->getResponse(),
@@ -43,15 +43,15 @@ final class BorrowingDetailApiTest extends ApiWebTestCase
         $this->loginAs($member->getEmail(), $plain);
         $this->client->request(
             'POST',
-            '/api/books/' . $book->getSlug() . '/borrow',
+            '/api/v1/borrows',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            '{"days": 5}',
+            json_encode(['bookSlug' => $book->getSlug(), 'days' => 5], \JSON_THROW_ON_ERROR),
         );
         $borrowId = (int) (json_decode((string) $this->client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR))['borrowId'];
 
-        $this->client->request('GET', '/api/borrows/' . $borrowId);
+        $this->client->request('GET', '/api/v1/borrows/' . $borrowId);
 
         $data = JsonTestAssertions::assertJsonResponse($this->client->getResponse(), Response::HTTP_OK);
         self::assertArrayHasKey('borrowId', $data);

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Api\ApiProblem;
+use App\Dto\Request\BorrowPatchRequest;
 use App\Dto\Response\BorrowingItemResponse;
 use App\Dto\Response\BorrowReturnSuccessResponse;
 use App\Dto\ReturnBookResult;
@@ -11,7 +12,9 @@ use App\Service\ReturnBookService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 
 final class BorrowReturnController extends AbstractController
 {
@@ -22,14 +25,25 @@ final class BorrowReturnController extends AbstractController
         private readonly BorrowsRepository $borrowsRepository,
     ) {}
 
-    #[Route(
-        '/api/borrows/{id}/return',
-        name: 'api_borrows_return',
-        methods: ['POST'],
-        requirements: ['id' => '\d+'],
-    )]
-    public function __invoke(int $id): JsonResponse
+    #[Route('/api/v1/borrows/{id}', name: 'api_v1_borrows_patch', methods: ['PATCH'], requirements: ['id' => '\d+'])]
+    public function __invoke(
+        int $id,
+        #[MapRequestPayload(
+            acceptFormat: 'json',
+            serializationContext: [AbstractObjectNormalizer::ALLOW_EXTRA_ATTRIBUTES => false],
+        )]
+        BorrowPatchRequest $input,
+    ): JsonResponse
     {
+        if ($input->returned !== true) {
+            return $this->jsonProblem(new ApiProblem(
+                status: Response::HTTP_BAD_REQUEST,
+                code: 'invalid_patch',
+                title: 'Invalid borrow update',
+                detail: 'Only {"returned": true} is currently supported on this endpoint.',
+            ));
+        }
+
         $user = $this->requireUser();
         if ($user instanceof JsonResponse) {
             return $user;

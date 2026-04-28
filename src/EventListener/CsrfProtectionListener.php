@@ -16,7 +16,7 @@ class CsrfProtectionListener
 
     /** @var list<string> */
     private const EXEMPT_PATH_PREFIXES = [
-        '/api/auth/', // public JSON login/register — no XSRF cookie
+        '/api/v1/auth/', // public JSON login/register — no XSRF cookie
         '/admin',      // HTML admin CRUD uses Symfony Form CSRF (_token), not X-XSRF-TOKEN
     ];
 

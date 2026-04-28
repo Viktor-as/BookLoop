@@ -21,7 +21,7 @@ final class MyBorrowedBooksController extends AbstractController
 
     public function __construct(private readonly BorrowsRepository $borrowsRepository) {}
 
-    #[Route('/api/me/borrowed-books', name: 'api_me_borrowed_books', methods: ['GET'])]
+    #[Route('/api/v1/users/me/borrows', name: 'api_v1_users_me_borrows', methods: ['GET'])]
     public function __invoke(Request $request): JsonResponse
     {
         $user = $this->requireUser();

@@ -24,14 +24,8 @@ final class BookBorrowController extends AbstractController
         private readonly BorrowBookService $borrowBookService,
     ) {}
 
-    #[Route(
-        '/api/books/{slug}/borrow',
-        name: 'api_books_borrow',
-        methods: ['POST'],
-        requirements: ['slug' => '[a-z0-9\-]+'],
-    )]
+    #[Route('/api/v1/borrows', name: 'api_v1_borrows_create', methods: ['POST'])]
     public function __invoke(
-        string $slug,
         #[MapRequestPayload(
             acceptFormat: 'json',
             serializationContext: [AbstractObjectNormalizer::ALLOW_EXTRA_ATTRIBUTES => false],
@@ -39,14 +33,14 @@ final class BookBorrowController extends AbstractController
         BorrowBookRequest $input,
         #[CurrentUser] Users $user,
     ): Response {
-        $result = $this->borrowBookService->borrow($user, $slug, (int) $input->days);
+        $result = $this->borrowBookService->borrow($user, (string) $input->bookSlug, (int) $input->days);
 
         if (!$result->ok) {
             return $this->jsonProblem($this->apiProblemForBorrowResult($result));
         }
 
         $location = $this->generateUrl(
-            'api_borrows_get',
+            'api_v1_borrows_get',
             ['id' => $result->borrowId],
             UrlGeneratorInterface::ABSOLUTE_URL,
         );

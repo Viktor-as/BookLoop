@@ -18,12 +18,7 @@ final class BorrowingDetailController extends AbstractController
         private readonly BorrowsRepository $borrowsRepository,
     ) {}
 
-    #[Route(
-        '/api/borrows/{id}',
-        name: 'api_borrows_get',
-        methods: ['GET'],
-        requirements: ['id' => '\d+'],
-    )]
+    #[Route('/api/v1/borrows/{id}', name: 'api_v1_borrows_get', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function __invoke(int $id): JsonResponse
     {
         $user = $this->requireUser();

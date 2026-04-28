@@ -19,7 +19,7 @@ final class ApplicationSmokeTest extends KernelTestCase
         self::bootKernel();
         $router = static::getContainer()->get('router');
         self::assertSame('/', $router->generate('home'));
-        self::assertSame('/api/books/catalog', $router->generate('api_books_catalog'));
+        self::assertSame('/api/v1/books', $router->generate('api_v1_books_index'));
         self::assertSame('/login', $router->generate('login_page'));
     }
 }

@@ -14,7 +14,7 @@ final class RegistrationApiTest extends ApiWebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/auth/register',
+            '/api/v1/auth/register',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -33,7 +33,7 @@ final class RegistrationApiTest extends ApiWebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/auth/register',
+            '/api/v1/auth/register',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -66,7 +66,7 @@ final class RegistrationApiTest extends ApiWebTestCase
 
         $this->client->request(
             'POST',
-            '/api/auth/register',
+            '/api/v1/auth/register',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -86,7 +86,7 @@ final class RegistrationApiTest extends ApiWebTestCase
     {
         $this->client->request(
             'POST',
-            '/api/auth/register',
+            '/api/v1/auth/register',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
