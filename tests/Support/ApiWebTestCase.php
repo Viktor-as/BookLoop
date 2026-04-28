@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Support;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +17,11 @@ abstract class ApiWebTestCase extends WebTestCase
     {
         parent::setUp();
         $this->client = static::createClient();
+
+        $pool = static::getContainer()->get('cache.rate_limiter');
+        if ($pool instanceof CacheItemPoolInterface) {
+            $pool->clear();
+        }
     }
 
     protected function loginAs(string $email, string $password): void

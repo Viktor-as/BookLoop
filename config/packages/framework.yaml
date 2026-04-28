@@ -1,6 +1,15 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
+    rate_limiter:
+        auth_login:
+            policy: fixed_window
+            limit: 10
+            interval: '1 minute'
+        auth_register:
+            policy: fixed_window
+            limit: 5
+            interval: '10 minutes'
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true

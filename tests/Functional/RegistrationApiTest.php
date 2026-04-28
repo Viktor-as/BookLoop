@@ -99,4 +99,48 @@ final class RegistrationApiTest extends ApiWebTestCase
             'invalid_json',
         );
     }
+
+    public function testRegistrationRateLimitReturns429WithRetryAfterHeader(): void
+    {
+        for ($attempt = 1; $attempt <= 5; ++$attempt) {
+            $payload = json_encode([
+                'firstName' => 'Fn',
+                'lastName'  => 'Ln',
+                'email'     => sprintf('rate-limit-%d@example.com', $attempt),
+                'password'  => 'password12',
+            ], \JSON_THROW_ON_ERROR);
+
+            $this->client->request(
+                'POST',
+                '/api/v1/auth/register',
+                [],
+                [],
+                ['CONTENT_TYPE' => 'application/json'],
+                $payload,
+            );
+
+            self::assertSame(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
+        }
+
+        $this->client->request(
+            'POST',
+            '/api/v1/auth/register',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'firstName' => 'Fn',
+                'lastName'  => 'Ln',
+                'email'     => 'rate-limit-overflow@example.com',
+                'password'  => 'password12',
+            ], \JSON_THROW_ON_ERROR),
+        );
+
+        JsonTestAssertions::assertJsonProblem(
+            $this->client->getResponse(),
+            Response::HTTP_TOO_MANY_REQUESTS,
+            'rate_limit_exceeded',
+        );
+        self::assertNotNull($this->client->getResponse()->headers->get('Retry-After'));
+    }
 }

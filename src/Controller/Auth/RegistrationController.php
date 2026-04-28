@@ -12,10 +12,13 @@ use App\Service\AuthCookieService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 
@@ -28,16 +31,38 @@ final class RegistrationController extends AbstractController
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly JWTTokenManagerInterface    $jwtManager,
         private readonly AuthCookieService           $cookieService,
+        #[Autowire(service: 'limiter.auth_register')]
+        private readonly RateLimiterFactory          $authRegisterLimiter,
     ) {}
 
     #[Route('/api/v1/auth/register', name: 'api_v1_auth_register', methods: ['POST'])]
     public function register(
+        Request $request,
         #[MapRequestPayload(
             acceptFormat: 'json',
             serializationContext: [AbstractObjectNormalizer::ALLOW_EXTRA_ATTRIBUTES => false],
         )]
         RegisterRequest $input,
     ): JsonResponse {
+        $limiter = $this->authRegisterLimiter->create($request->getClientIp() ?? 'unknown');
+        $limit = $limiter->consume();
+        if (!$limit->isAccepted()) {
+            $response = $this->jsonProblem(new ApiProblem(
+                status: Response::HTTP_TOO_MANY_REQUESTS,
+                code: 'rate_limit_exceeded',
+                title: 'Too many requests',
+                detail: 'Too many registration attempts. Please wait before trying again.',
+            ));
+
+            $retryAfter = $limit->getRetryAfter();
+            if ($retryAfter !== null) {
+                $seconds = max(1, $retryAfter->getTimestamp() - time());
+                $response->headers->set('Retry-After', (string) $seconds);
+            }
+
+            return $response;
+        }
+
         $existing = $this->em->getRepository(Users::class)->findOneBy(['email' => (string) $input->email]);
         if ($existing) {
             return $this->jsonProblem(new ApiProblem(

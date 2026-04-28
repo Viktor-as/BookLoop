@@ -113,4 +113,41 @@ final class LoginApiTest extends ApiWebTestCase
             'invalid_credentials',
         );
     }
+
+    public function testLoginRateLimitReturns429WithRetryAfterHeader(): void
+    {
+        $payload = json_encode([
+            'email'    => 'nobody@example.com',
+            'password' => 'WrongPwd123',
+        ], \JSON_THROW_ON_ERROR);
+
+        for ($attempt = 1; $attempt <= 10; ++$attempt) {
+            $this->client->request(
+                'POST',
+                '/api/v1/auth/login',
+                [],
+                [],
+                ['CONTENT_TYPE' => 'application/json'],
+                $payload,
+            );
+
+            self::assertSame(Response::HTTP_UNAUTHORIZED, $this->client->getResponse()->getStatusCode());
+        }
+
+        $this->client->request(
+            'POST',
+            '/api/v1/auth/login',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            $payload,
+        );
+
+        JsonTestAssertions::assertJsonProblem(
+            $this->client->getResponse(),
+            Response::HTTP_TOO_MANY_REQUESTS,
+            'rate_limit_exceeded',
+        );
+        self::assertNotNull($this->client->getResponse()->headers->get('Retry-After'));
+    }
 }
